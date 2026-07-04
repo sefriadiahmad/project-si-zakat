@@ -1,0 +1,48 @@
+{
+  "name": "sistem-zakat-server",
+  "version": "1.0.0",
+  "description": "Backend API untuk Sistem Informasi Zakat",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "migrate": "knex migrate:latest",
+    "migrate:rollback": "knex migrate:rollback",
+    "migrate:make": "knex migrate:make",
+    "seed": "knex seed:run",
+    "seed:make": "knex seed:make",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
+  },
+  "keywords": [
+    "zakat",
+    "islamic",
+    "finance",
+    "masjid"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0",
+    "cors": "^2.8.5",
+    "helmet": "^8.0.0",
+    "compression": "^1.7.4",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "knex": "^3.1.0",
+    "pg": "^8.13.0",
+    "zod": "^3.23.8",
+    "express-rate-limit": "^7.4.0",
+    "uuid": "^10.0.0",
+    "dotenv": "^16.4.5",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.2",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "fast-check": "^4.0.0"
+  }
+}
