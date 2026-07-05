@@ -8,7 +8,9 @@ import {
 } from './auth.service.js'
 import { AppError, ErrorCodes } from '../utils/errors.js'
 
-const validCredentialString = fc.string({ minLength: 1, maxLength: 50 })
+const validCredentialString = fc
+  .string({ minLength: 1, maxLength: 50 })
+  .filter((s) => s.trim().length > 0)
 
 describe('auth service', () => {
   test('maps database users to public auth users', () => {

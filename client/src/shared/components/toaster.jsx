@@ -1,142 +1,97 @@
 import * as React from 'react'
-import { cva } from 'class-variance-authority'
 import { cn } from '@shared/lib/utils'
 
-const toastStyles = cva(
-  'pointer-events-auto flex w-full flex-col items-center gap-3 overflow-hidden rounded-lg border p-4 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full',
-  {
-    variants: {
-      variant: {
-        default: 'border bg-background text-foreground',
-        destructive: 'destructive group border-destructive bg-destructive text-destructive-foreground',
-        success: 'border-green-500 bg-green-50 text-green-900',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-    },
-  }
-)
+// ── Toast Context ──────────────────────────────────────────────────────────────
 
-const ToastContext = React.createContext(undefined)
+const ToastContext = React.createContext(null)
 
 function useToast() {
-  const toastState = React.useContext(ToastContext)
-  if (!toastState) {
-    throw new Error('useToast must be used within a ToastProvider')
+  const ctx = React.useContext(ToastContext)
+  if (!ctx) {
+    throw new Error('useToast must be used within a <ToastProvider />')
   }
-  return toastState
+  return ctx
 }
+
+// ── Provider + Renderer ────────────────────────────────────────────────────────
 
 function ToastProvider({ children }) {
   const [toasts, setToasts] = React.useState([])
 
-  const addToast = React.useCallback(({ title, description, variant = 'default', duration = 5000 }) => {
-    const id = Math.random().toString(36).substring(2, 9)
-    const newToast = { id, title, description, variant, duration }
+  const toast = React.useCallback(
+    ({ title, description, variant = 'default', duration = 5000 }) => {
+      const id = Math.random().toString(36).substring(2, 9)
+      setToasts((prev) => [...prev, { id, title, description, variant }])
+      if (duration !== Infinity) {
+        setTimeout(() => {
+          setToasts((prev) => prev.filter((t) => t.id !== id))
+        }, duration)
+      }
+      return id
+    },
+    []
+  )
 
-    setToasts((prev) => [...prev, newToast])
-
-    if (duration !== Infinity) {
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id))
-      }, duration)
-    }
-
-    return id
-  }, [])
-
-  const removeToast = React.useCallback((id) => {
+  const dismiss = React.useCallback((id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
-  const toast = React.useMemo(
-    () => ({
-      toast: addToast,
-      dismiss: removeToast,
-    }),
-    [addToast, removeToast]
-  )
+  const value = React.useMemo(() => ({ toast, dismiss }), [toast, dismiss])
 
   return (
-    <ToastContext.Provider value={toast}>
+    <ToastContext.Provider value={value}>
       {children}
-      <ToastViewport />
+      {/* Toast Viewport rendered inside the provider */}
+      <div
+        className="fixed bottom-4 right-4 z-[100] flex max-h-screen w-full max-w-[420px] flex-col-reverse gap-2 pointer-events-none"
+        aria-live="polite"
+        aria-label="Notifikasi"
+      >
+        {toasts.map((t) => (
+          <ToastItem key={t.id} {...t} onDismiss={dismiss} />
+        ))}
+      </div>
     </ToastContext.Provider>
   )
 }
 
-function ToastViewport({ className, ...props }) {
-  const toasts = React.useContext(ToastContext)
-  const [mounted, setMounted] = React.useState(false)
+/** Legacy: keep Toaster as an alias — just renders nothing by itself */
+function Toaster() { return null }
 
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
+function ToastItem({ id, title, description, variant = 'default', onDismiss }) {
+  const variantClasses = {
+    default: 'border border-slate-200 bg-white text-slate-900 shadow-lg',
+    destructive: 'border border-red-200 bg-red-50 text-red-900 shadow-lg',
+    success: 'border border-emerald-200 bg-emerald-50 text-emerald-900 shadow-lg',
+  }
 
   return (
     <div
+      role="alert"
       className={cn(
-        'fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]',
-        className
+        'pointer-events-auto flex w-full items-start gap-3 rounded-xl p-4 transition-all animate-in slide-in-from-bottom-2',
+        variantClasses[variant] || variantClasses.default
       )}
-      {...props}
     >
-      {toasts.toast ? null : null}
+      <div className="flex-1 min-w-0">
+        {title && (
+          <div className="text-sm font-semibold leading-snug">{title}</div>
+        )}
+        {description && (
+          <div className="mt-0.5 text-xs opacity-80 leading-snug">{description}</div>
+        )}
+      </div>
+      <button
+        onClick={() => onDismiss(id)}
+        className="flex-shrink-0 rounded-md p-0.5 opacity-60 hover:opacity-100 transition-opacity focus:outline-none"
+        aria-label="Tutup notifikasi"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      </button>
     </div>
   )
 }
 
-function Toast({ className, variant = 'default', ...props }) {
-  return <div className={cn(toastStyles({ variant }), className)} {...props} />
-}
-
-function Toaster() {
-  const [toasts, setToasts] = React.useState([])
-
-  const addToast = React.useCallback(({ title, description, variant = 'default', duration = 5000 }) => {
-    const id = Math.random().toString(36).substring(2, 9)
-    const newToast = { id, title, description, variant, duration }
-
-    setToasts((prev) => [...prev, newToast])
-
-    if (duration !== Infinity) {
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id))
-      }, duration)
-    }
-
-    return id
-  }, [])
-
-  const removeToast = React.useCallback((id) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id))
-  }, [])
-
-  if (typeof window !== 'undefined') {
-    window.toast = { toast: addToast, dismiss: removeToast }
-  }
-
-  return (
-    <ToastProvider>
-      <div
-        className="fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]"
-      >
-        {toasts.map((t) => (
-          <Toast
-            key={t.id}
-            variant={t.variant}
-            className="mb-2"
-          >
-            {t.title && <div className="text-sm font-semibold">{t.title}</div>}
-            {t.description && <div className="text-sm opacity-90">{t.description}</div>}
-          </Toast>
-        ))}
-      </div>
-    </ToastProvider>
-  )
-}
-
-export { Toast, Toaster, useToast, ToastProvider }
+export { Toaster, ToastProvider, useToast }

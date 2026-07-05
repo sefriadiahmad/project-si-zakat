@@ -82,11 +82,6 @@ const ToastDescription = React.forwardRef(({ className, ...props }, ref) => (
 ))
 ToastDescription.displayName = ToastPrimitives.Description.displayName
 
-const ToastFooter = React.forwardRef(({ className, ...props }, ref) => (
-  <ToastPrimitives.Footer ref={ref} className={cn('flex items-center gap-2', className)} {...props} />
-))
-ToastFooter.displayName = 'ToastFooter'
-
 export {
   ToastProvider,
   ToastViewport,
@@ -95,5 +90,4 @@ export {
   ToastDescription,
   ToastClose,
   ToastAction,
-  ToastFooter,
 }

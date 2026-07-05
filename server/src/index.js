@@ -9,6 +9,8 @@ dotenv.config()
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js'
 import { authRateLimiter } from './middleware/rateLimit.js'
 import authRoutes from './routes/auth.routes.js'
+import muzakkiRoutes from './routes/muzakki.routes.js'
+import wilayahRtRoutes from './routes/wilayahRt.routes.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -30,6 +32,8 @@ app.get('/health', (req, res) => {
 })
 
 app.use('/api/auth', authRateLimiter, authRoutes)
+app.use('/api/muzakki', muzakkiRoutes)
+app.use('/api/wilayah-rt', wilayahRtRoutes)
 
 app.use(notFoundHandler)
 
