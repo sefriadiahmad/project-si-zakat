@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { JENIS_ZAKAT_LABELS, METODE_BAYAR_LABELS } from '@shared/constants'
 
 export default function ThermalReceipt({ session, masjidName = 'Masjid example' }) {

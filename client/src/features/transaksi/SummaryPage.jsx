@@ -77,7 +77,7 @@ export default function SummaryPage() {
         title: 'PDF Berhasil Diunduh',
         description: 'Bukti setor PDF telah diunduh.',
       })
-    } catch (error) {
+    } catch {
       toast({
         variant: 'destructive',
         title: 'Gagal membuat PDF. Coba lagi.',

@@ -14,6 +14,7 @@ import mustahikRoutes from './routes/mustahik.routes.js'
 import wilayahRtRoutes from './routes/wilayahRt.routes.js'
 import { MUSTAHIK_UPLOAD_DIR } from './middleware/upload.js'
 import zakatRoutes from './routes/zakat.routes.js'
+import distribusiRoutes from './routes/distribusi.routes.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -40,6 +41,7 @@ app.use('/api/muzakki', muzakkiRoutes)
 app.use('/api/mustahik', mustahikRoutes)
 app.use('/api/wilayah-rt', wilayahRtRoutes)
 app.use('/api/zakat', zakatRoutes)
+app.use('/api/distribusi', distribusiRoutes)
 
 app.use(notFoundHandler)
 

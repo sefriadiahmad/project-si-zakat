@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@shared/lib/api'
@@ -17,10 +17,9 @@ import {
   SelectItem,
   Button,
   Checkbox,
-  Textarea,
 } from '@shared/components'
 import { useToast } from '@shared/components/toaster'
-import { ArrowLeft, ArrowRight, Plus, Trash2, Save, Search } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Save, Search } from 'lucide-react'
 import { useTotalCalc } from './useTotalCalc'
 import { JENIS_ZAKAT, JENIS_ZAKAT_LABELS, METODE_BAYAR, METODE_BAYAR_LABELS } from '@shared/constants'
 
@@ -137,9 +136,6 @@ export default function FunnelFormPage() {
     }
     createMutation.mutate(payload)
   }
-
-  const fmt = (v) =>
-    new Date(v).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
