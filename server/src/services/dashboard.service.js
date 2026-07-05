@@ -44,8 +44,9 @@ export async function getDashboardSummary(queryParams = {}, dependencies = {}) {
     .groupBy('wilayah_rt.id', 'wilayah_rt.nama_rt')
     .count('muzakki.id as count')
     .select('wilayah_rt.nama_rt', 'count')
+    .first()
 
-  const chartAsnafDonat = await baseKeluar.clone()
+  const chartAsnafDonat = await connection('zakat_keluar')
     .join('mustahik_asnaf', 'zakat_keluar.mustahik_id', 'mustahik_asnaf.id')
     .groupBy('mustahik_asnaf.kategori_asnaf')
     .sum({
@@ -53,6 +54,7 @@ export async function getDashboardSummary(queryParams = {}, dependencies = {}) {
       total_beras: connection.raw("CASE WHEN berat_kg IS NOT NULL THEN berat_kg ELSE 0 END"),
     })
     .select('mustahik_asnaf.kategori_asnaf', 'total_nominal', 'total_beras')
+    .first()
 
   return {
     total_nominal: Number(summary?.total_nominal || 0),

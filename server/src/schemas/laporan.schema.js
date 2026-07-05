@@ -1,6 +1,9 @@
 import { z } from 'zod'
 
-export const DashboardQuerySchema = z.object({
+export const LaporanExportQuerySchema = z.object({
+  format: z.enum(['pdf', 'xlsx'], {
+    errorMap: () => ({ message: 'Format export tidak valid. Pilih pdf atau xlsx.' }),
+  }),
   tahun_hijriah: z.coerce
     .number({ invalid_type_error: 'Tahun hijriah harus berupa angka' })
     .int('Tahun hijriah harus bilangan bulat')
@@ -15,4 +18,8 @@ export const DashboardQuerySchema = z.object({
     .max(2100, 'Tahun masehi tidak valid')
     .optional()
     .nullable(),
+  jenis_zakat: z.enum(['fitrah_uang', 'fitrah_beras', 'mal', 'fidyah', 'infaq', 'semua'], {
+    errorMap: () => ({ message: 'Jenis zakat tidak valid' }),
+  }).default('semua'),
+  wilayah_rt_id: z.coerce.number().int().positive().optional(),
 })

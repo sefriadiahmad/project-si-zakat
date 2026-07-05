@@ -16,6 +16,7 @@ import { MUSTAHIK_UPLOAD_DIR } from './middleware/upload.js'
 import zakatRoutes from './routes/zakat.routes.js'
 import distribusiRoutes from './routes/distribusi.routes.js'
 import dashboardRoutes from './routes/dashboard.routes.js'
+import laporanRoutes from './routes/laporan.routes.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -44,6 +45,7 @@ app.use('/api/wilayah-rt', wilayahRtRoutes)
 app.use('/api/zakat', zakatRoutes)
 app.use('/api/distribusi', distribusiRoutes)
 app.use('/api/dashboard', dashboardRoutes)
+app.use('/api/laporan', laporanRoutes)
 
 app.use(notFoundHandler)
 

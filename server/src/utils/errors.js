@@ -36,6 +36,9 @@ export const ErrorCodes = {
   // Not found
   NOT_FOUND: 'NOT_FOUND',
 
+  // Timeout
+  TIMEOUT: 'TIMEOUT',
+
   // Server
   INTERNAL_ERROR: 'INTERNAL_ERROR',
 }
