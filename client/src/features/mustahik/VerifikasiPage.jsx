@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import api from '@shared/lib/api'
-import { useAuth } from '@features/auth/AuthContext'
 import {
   Table,
   TableHeader,
@@ -28,7 +26,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
-import { STATUS_VERIFIKASI_LABELS, KATEGORI_ASNAF_LABELS } from '@shared/constants'
+import { KATEGORI_ASNAF_LABELS } from '@shared/constants'
 
 const rejectSchema = z.object({
   alasan_penolakan: z
@@ -39,7 +37,6 @@ const rejectSchema = z.object({
 })
 
 export default function VerifikasiPage() {
-  const { user } = useAuth()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [selectedMustahik, setSelectedMustahik] = useState(null)

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import api from '@shared/lib/api'
 import { useAuth } from '@features/auth/AuthContext'
 import {
@@ -36,8 +36,7 @@ const statusBadgeClass = {
 
 export default function MustahikListPage() {
   const { user } = useAuth()
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
+  const _toast = useToast()
   const isAdmin = user?.role === 'admin_masjid'
 
   const [search, setSearch] = useState('')

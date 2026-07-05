@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -19,7 +19,6 @@ import {
   SelectContent,
   SelectItem,
   Button,
-  Textarea,
 } from '@shared/components'
 import { useToast } from '@shared/components/toaster'
 import { ArrowLeft, Save, Upload } from 'lucide-react'
