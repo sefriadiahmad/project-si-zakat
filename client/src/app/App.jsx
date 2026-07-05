@@ -12,6 +12,7 @@ import VerifikasiPage from '@features/mustahik/VerifikasiPage'
 import FunnelFormPage from '@features/transaksi/FunnelForm'
 import SummaryPage from '@features/transaksi/SummaryPage'
 import DistribusiPage from '@features/distribusi/DistribusiPage'
+import LaporanPage from '@features/laporan/LaporanPage'
 
 function App() {
   return (
@@ -38,7 +39,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/mustahik/verifikasi" element={<VerifikasiPage />} />
           <Route path="/distribusi" element={<DistribusiPage />} />
-          <Route path="/laporan" element={<AdminOnlyPlaceholder />} />
+          <Route path="/laporan" element={<LaporanPage />} />
         </Route>
       </Route>
 
