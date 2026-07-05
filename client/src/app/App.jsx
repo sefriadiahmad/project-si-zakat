@@ -11,6 +11,7 @@ import MustahikFormPage from '@features/mustahik/MustahikFormPage'
 import VerifikasiPage from '@features/mustahik/VerifikasiPage'
 import FunnelFormPage from '@features/transaksi/FunnelForm'
 import SummaryPage from '@features/transaksi/SummaryPage'
+import DistribusiPage from '@features/distribusi/DistribusiPage'
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
       <Route element={<ProtectedRoute allowedRoles={['admin_masjid']} />}>
         <Route element={<AppLayout />}>
           <Route path="/mustahik/verifikasi" element={<VerifikasiPage />} />
+          <Route path="/distribusi" element={<DistribusiPage />} />
           <Route path="/laporan" element={<AdminOnlyPlaceholder />} />
         </Route>
       </Route>
