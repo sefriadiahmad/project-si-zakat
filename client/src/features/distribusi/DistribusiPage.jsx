@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
-  CardFooter,
   Button,
   Badge,
   Table,
@@ -38,7 +37,7 @@ export default function DistribusiPage() {
   const [tahunHijriah, setTahunHijriah] = useState(new Date().getFullYear())
   const [tahunMasehi, setTahunMasehi] = useState(new Date().getFullYear())
 
-  const { data: kuotaData, isLoading, isError, refetch } = useQuery({
+  const { data: kuotaData, isLoading, isError } = useQuery({
     queryKey: ['distribusi-kuota'],
     queryFn: async () => {
       const response = await api.get('/distribusi/kuota')
