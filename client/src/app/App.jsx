@@ -13,11 +13,12 @@ import FunnelFormPage from '@features/transaksi/FunnelForm'
 import SummaryPage from '@features/transaksi/SummaryPage'
 import DistribusiPage from '@features/distribusi/DistribusiPage'
 import LaporanPage from '@features/laporan/LaporanPage'
+import LandingPage from '@features/public/LandingPage'
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
 
       {/* Protected Routes for Admin & Amil */}
