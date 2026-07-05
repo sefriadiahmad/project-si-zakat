@@ -9,6 +9,8 @@ import MuzakkiFormPage from '@features/muzakki/MuzakkiFormPage'
 import MustahikListPage from '@features/mustahik/MustahikListPage'
 import MustahikFormPage from '@features/mustahik/MustahikFormPage'
 import VerifikasiPage from '@features/mustahik/VerifikasiPage'
+import FunnelFormPage from '@features/transaksi/FunnelForm'
+import SummaryPage from '@features/transaksi/SummaryPage'
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
           <Route path="/muzakki/:id/edit" element={<MuzakkiFormPage />} />
           <Route path="/mustahik" element={<MustahikListPage />} />
           <Route path="/mustahik/baru" element={<MustahikFormPage />} />
+          <Route path="/transaksi/baru" element={<FunnelFormPage />} />
+          <Route path="/transaksi/:id" element={<SummaryPage />} />
         </Route>
       </Route>
 

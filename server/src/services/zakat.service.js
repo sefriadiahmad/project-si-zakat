@@ -63,3 +63,29 @@ export async function getZakatMasukBySession(sessionId, dependencies = {}) {
 
   return rows
 }
+
+export async function markZakatSessionPrinted(sessionId, printType, userId, dependencies = {}) {
+  const connection = dependencies.db || db
+  const logMutation = dependencies.auditLog || auditLog
+
+  const existing = await connection('zakat_masuk').where({ session_id: sessionId }).first()
+  if (!existing) {
+    throw new AppError('Transaksi tidak ditemukan', 404, ErrorCodes.NOT_FOUND)
+  }
+
+  await connection.transaction(async (trx) => {
+    await trx('zakat_masuk')
+      .where({ session_id: sessionId })
+      .update({
+        print_at: trx.fn.now(),
+        print_type: printType,
+      })
+
+    await logMutation(trx, userId, 'UPDATE', 'zakat_masuk', existing.id, {
+      print_at: trx.fn.now(),
+      print_type: printType,
+    })
+  })
+
+  return { session_id: sessionId, print_type: printType }
+}
