@@ -67,7 +67,9 @@ export default function FunnelFormPage() {
       return response.data
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['mustahik'] })
+      // Refresh dashboard totals and any related zakat-session data
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['zakat-session'] })
       toast({
         title: 'Transaksi Berhasil',
         description: `Transaksi ${data.session_id} berhasil disimpan.`,

@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import AdminOnlyPlaceholder from '@features/auth/AdminOnlyPlaceholder'
 import LoginPage from '@features/auth/LoginPage'
 import ProtectedRoute from '@features/auth/ProtectedRoute'
 import DashboardPage from '@features/dashboard/DashboardPage'

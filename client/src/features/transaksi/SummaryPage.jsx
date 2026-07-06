@@ -47,6 +47,7 @@ export default function SummaryPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['zakat-session', sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
     },
     onError: (error) => {
       toast({

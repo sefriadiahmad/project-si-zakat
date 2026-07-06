@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, MapPin, Users, UserCheck, TrendingUp, TrendingDown, Calendar } from 'lucide-react'
 import {
   PieChart,
@@ -14,7 +14,6 @@ import { Input } from '@shared/components/input'
 import { Label } from '@shared/components/label'
 import { Button } from '@shared/components/button'
 import { Skeleton } from '@shared/components/skeleton'
-import { KATEGORI_ASNAF_LABELS } from '@shared/constants'
 import { useDemografiRTDetail, formatCurrency, formatKg, ASNRAF_COLORS } from './useDemografiData'
 
 export default function RTDetailPage() {
@@ -309,8 +308,8 @@ export default function RTDetailPage() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                          {asnafChartData.map((item, index) => (
-                            <tr key={item.kategori} className="hover:bg-slate-50">
+{asnafChartData.map((item) => (
+                             <tr key={item.kategori} className="hover:bg-slate-50">
                               <td className="px-3 py-2">
                                 <div className="flex items-center gap-2">
                                   <div

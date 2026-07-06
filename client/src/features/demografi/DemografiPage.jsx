@@ -9,9 +9,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
   Legend,
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/card'
@@ -19,8 +16,7 @@ import { Input } from '@shared/components/input'
 import { Label } from '@shared/components/label'
 import { Button } from '@shared/components/button'
 import { Skeleton } from '@shared/components/skeleton'
-import { KATEGORI_ASNAF_LABELS } from '@shared/constants'
-import { useDemografiData, formatCurrency, formatKg, formatRasio, ASNRAF_COLORS } from './useDemografiData'
+import { useDemografiData, formatCurrency, formatRasio } from './useDemografiData'
 
 export default function DemografiPage() {
   const [tahunHijriah, setTahunHijriah] = useState('')
@@ -35,7 +31,7 @@ export default function DemografiPage() {
     return params
   }, [tahunHijriah, tahunMasehi])
 
-  const { data: demografiData, isLoading, isError, error } = useDemografiData(filter)
+  const { data: demografiData, isLoading, isError } = useDemografiData(filter)
 
   // Sort data
   const sortedData = useMemo(() => {

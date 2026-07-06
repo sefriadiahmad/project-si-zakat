@@ -73,6 +73,7 @@ export default function MuzakkiListPage() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['muzakki'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       toast({
         title: 'Status Berhasil Diperbarui',
         description: `Muzakki ${data.nama_lengkap} kini ${data.is_active ? 'aktif' : 'nonaktif'}.`,

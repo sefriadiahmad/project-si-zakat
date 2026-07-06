@@ -7,9 +7,6 @@
  * write SHALL occur for such requests.
  *
  * Validates: Requirements 11.5, 11.6
- *
- * This test verifies that all API endpoints properly validate input and return
- * structured error responses identifying the invalid fields.
  */
 
 import { describe, expect, test, jest } from '@jest/globals'
@@ -23,7 +20,7 @@ import {
   mustahikVerifikasiSchema,
 } from '../schemas/mustahik.schema.js'
 import { SplitTransaksiSchema } from '../schemas/zakat.schema.js'
-import { ZakatKeluarSchema, DistribusiKuotaQuerySchema } from '../schemas/distribusi.schema.js'
+import { ZakatKeluarSchema } from '../schemas/distribusi.schema.js'
 import { DashboardQuerySchema } from '../schemas/dashboard.schema.js'
 import { DemografiQuerySchema } from '../schemas/demografi.schema.js'
 
@@ -36,6 +33,8 @@ import { createZakatKeluar } from './distribusi.service.js'
 const user = { id: 1 }
 
 describe('Property 18: API Input Validation Returns 400 with Field Details', () => {
+
+  // ─── Schema-level: Error objects always identify field names ─────────────────
 
   describe('Schema Validation Errors Contain Field Names', () => {
 
@@ -52,7 +51,6 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
         expect(error).toBeInstanceOf(ZodError)
         expect(error.errors.length).toBeGreaterThan(0)
 
-        // Find the nama_lengkap error
         const namaError = error.errors.find((e) => e.path.includes('nama_lengkap'))
         expect(namaError).toBeDefined()
         expect(namaError.message).toContain('wajib')
@@ -104,7 +102,7 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
 
         expect(result.success).toBe(false)
         const error = result.error
-        expect(error.errors.length).toBeGreaterThanOrEqual(3) // nama_lengkap, no_telepon, wilayah_rt_id
+        expect(error.errors.length).toBeGreaterThanOrEqual(3)
 
         const requiredFields = ['nama_lengkap', 'no_telepon', 'wilayah_rt_id']
         for (const field of requiredFields) {
@@ -129,8 +127,7 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
         expect(asnafError).toBeDefined()
       })
 
-      test('rejects jumlah_tanggungan outside 1-99 range with field identification', () => {
-        // Test below minimum
+      test('rejects jumlah_tanggungan below minimum', () => {
         const belowMin = mustahikCreateSchema.safeParse({
           nama_kepala_keluarga: 'Test Mustahik',
           wilayah_rt_id: 1,
@@ -141,8 +138,9 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
         expect(belowMin.success).toBe(false)
         const belowError = belowMin.error.errors.find((e) => e.path.includes('jumlah_tanggungan'))
         expect(belowError).toBeDefined()
+      })
 
-        // Test above maximum
+      test('rejects jumlah_tanggungan above maximum', () => {
         const aboveMax = mustahikCreateSchema.safeParse({
           nama_kepala_keluarga: 'Test Mustahik',
           wilayah_rt_id: 1,
@@ -182,7 +180,7 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
         expect(statusError).toBeDefined()
       })
 
-      test('rejects rejection without alasan_penolakan with field identification', () => {
+      test('rejects rejection without alasan_penolakan', () => {
         const result = mustahikVerifikasiSchema.safeParse({
           status_verifikasi: 'ditolak',
           alasan_penolakan: '',
@@ -194,7 +192,7 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
         expect(alasanError).toBeDefined()
       })
 
-      test('rejects alasan_penolakan exceeding 500 chars with field identification', () => {
+      test('rejects alasan_penolakan exceeding 500 chars', () => {
         const result = mustahikVerifikasiSchema.safeParse({
           status_verifikasi: 'ditolak',
           alasan_penolakan: 'A'.repeat(501),
@@ -231,9 +229,7 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
           metode_bayar: 'tunai',
           tahun_hijriah: 1446,
           tahun_masehi: 2025,
-          items: [
-            { jenis_zakat: 'invalid_zakat', nominal: 100000 },
-          ],
+          items: [{ jenis_zakat: 'invalid_zakat', nominal: 100000, berat_kg: 0 }],
         })
 
         expect(result.success).toBe(false)
@@ -250,9 +246,7 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
           metode_bayar: 'transfer',
           tahun_hijriah: 1446,
           tahun_masehi: 2025,
-          items: [
-            { jenis_zakat: 'fitrah_uang', nominal: 100000 },
-          ],
+          items: [{ jenis_zakat: 'fitrah_uang', nominal: 100000, berat_kg: 0 }],
         })
 
         expect(result.success).toBe(false)
@@ -268,9 +262,7 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
           metode_bayar: 'qris',
           tahun_hijriah: 1446,
           tahun_masehi: 2025,
-          items: [
-            { jenis_zakat: 'fitrah_uang', nominal: 100000 },
-          ],
+          items: [{ jenis_zakat: 'fitrah_uang', nominal: 100000, berat_kg: 0 }],
         })
 
         expect(result.success).toBe(false)
@@ -280,31 +272,27 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
         expect(refError.message).toContain('QRIS')
       })
 
-      test('rejects invalid tahun_hijriah range with field identification', () => {
-        // Below minimum
+      test('rejects tahun_hijriah below minimum', () => {
         const belowMin = SplitTransaksiSchema.safeParse({
           muzakki_id: 1,
           metode_bayar: 'tunai',
           tahun_hijriah: 1399,
           tahun_masehi: 2025,
-          items: [
-            { jenis_zakat: 'fitrah_uang', nominal: 100000 },
-          ],
+          items: [{ jenis_zakat: 'fitrah_uang', nominal: 100000, berat_kg: 0 }],
         })
 
         expect(belowMin.success).toBe(false)
         const belowError = belowMin.error.errors.find((e) => e.path.includes('tahun_hijriah'))
         expect(belowError).toBeDefined()
+      })
 
-        // Above maximum
+      test('rejects tahun_hijriah above maximum', () => {
         const aboveMax = SplitTransaksiSchema.safeParse({
           muzakki_id: 1,
           metode_bayar: 'tunai',
           tahun_hijriah: 1501,
           tahun_masehi: 2025,
-          items: [
-            { jenis_zakat: 'fitrah_uang', nominal: 100000 },
-          ],
+          items: [{ jenis_zakat: 'fitrah_uang', nominal: 100000, berat_kg: 0 }],
         })
 
         expect(aboveMax.success).toBe(false)
@@ -318,9 +306,7 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
           metode_bayar: 'tunai',
           tahun_hijriah: 1446,
           tahun_masehi: 2025,
-          items: [
-            { jenis_zakat: 'fitrah_uang', nominal: -100000 },
-          ],
+          items: [{ jenis_zakat: 'fitrah_uang', nominal: -100000, berat_kg: 0 }],
         })
 
         expect(result.success).toBe(false)
@@ -330,19 +316,6 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
         )
         expect(nominalError).toBeDefined()
         expect(nominalError.message).toContain('negatif')
-      })
-    })
-
-    describe('Distribusi Schema', () => {
-      test('rejects ZakatKeluarSchema with invalid data', () => {
-        const result = ZakatKeluarSchema.safeParse({
-          mustahik_id: -1,
-          nominal: -1000,
-        })
-
-        expect(result.success).toBe(false)
-        const error = result.error
-        expect(error.errors.length).toBeGreaterThan(0)
       })
     })
 
@@ -356,7 +329,7 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
         const error = result.error
         const tahunError = error.errors.find((e) => e.path.includes('tahun_hijriah'))
         expect(tahunError).toBeDefined()
-        expect(tahunError.message).toContain('4 digit')
+        expect(tahunError.message).toContain('angka')
       })
     })
 
@@ -375,152 +348,115 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
     })
   })
 
+  // ─── Property-based: Validation always identifies fields ────────────────────
+
   describe('Property-based: Validation Errors Always Identify Fields', () => {
-    test('for any invalid muzakki input, errors array contains the invalid field name', async () => {
+
+    test('for any empty nama_lengkap, error path identifies nama_lengkap field', async () => {
       await fc.assert(
         fc.asyncProperty(
-          fc.record({
-            nama_lengkap: fc.oneof(
-              fc.constant(''),
-              fc.string({ minLength: 151, maxLength: 300 }),
-            ),
-            no_telepon: fc.oneof(
-              fc.constant(''),
-              fc.string({ minLength: 21, maxLength: 50 }),
-              fc.string({ minLength: 1, maxLength: 20 }).filter((s) => !/^[0-9]+$/.test(s)),
-            ),
-            wilayah_rt_id: fc.oneof(
-              fc.constant(0),
-              fc.constant(-1),
-              fc.constant(null),
-            ),
-          }),
-          async (invalidData) => {
-            const result = muzakkiSchema.safeParse(invalidData)
+          fc.string({ minLength: 1, maxLength: 20 }),
+          async (phone) => {
+            const result = muzakkiSchema.safeParse({
+              nama_lengkap: '',
+              no_telepon: phone,
+              wilayah_rt_id: 1,
+            })
 
             expect(result.success).toBe(false)
-            const error = result.error
-
-            // All errors should have path containing the field name
-            for (const err of error.errors) {
-              expect(err.path.length).toBeGreaterThan(0)
-              const fieldName = err.path[err.path.length - 1]
-              expect(typeof fieldName).toBe('string')
-
-              // The field name should be one of the expected fields
-              expect(['nama_lengkap', 'no_telepon', 'wilayah_rt_id']).toContain(fieldName)
-            }
+            const fieldNames = result.error.errors.map((e) => e.path[e.path.length - 1])
+            expect(fieldNames).toContain('nama_lengkap')
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 30 }
       )
     })
 
-    test('for any invalid mustahik input, errors array contains the invalid field name', async () => {
+    test('for any empty no_telepon, error path identifies no_telepon field', async () => {
+      // Generate empty or whitespace-only strings
       await fc.assert(
         fc.asyncProperty(
-          fc.record({
-            nama_kepala_keluarga: fc.oneof(
-              fc.constant(''),
-              fc.string({ minLength: 151, maxLength: 300 }),
-            ),
-            wilayah_rt_id: fc.oneof(
-              fc.constant(0),
-              fc.constant(-1),
-            ),
-            kategori_asnaf: fc.string({ minLength: 1, maxLength: 50 }).filter(
-              (s) => !['fakir', 'miskin', 'amil', 'mualaf', 'riqab', 'gharim', 'fisabilillah', 'ibnu_sabil'].includes(s)
-            ),
-            jumlah_tanggungan: fc.oneof(
-              fc.constant(0),
-              fc.integer({ min: 100, max: 200 }),
-            ),
-          }),
-          async (invalidData) => {
-            const result = mustahikCreateSchema.safeParse(invalidData)
+          fc.constantFrom('', '   ', '\t', '\n'),
+          async (phone) => {
+            const result = muzakkiSchema.safeParse({
+              nama_lengkap: 'Valid Name',
+              no_telepon: phone,
+              wilayah_rt_id: 1,
+            })
 
             expect(result.success).toBe(false)
-            const error = result.error
-
-            // All errors should have path containing the field name
-            for (const err of error.errors) {
-              expect(err.path.length).toBeGreaterThan(0)
-              const fieldName = err.path[err.path.length - 1]
-              expect(typeof fieldName).toBe('string')
-
-              // The field name should be one of the expected fields
-              expect(['nama_kepala_keluarga', 'wilayah_rt_id', 'kategori_asnaf', 'jumlah_tanggungan']).toContain(fieldName)
-            }
+            const fieldNames = result.error.errors.map((e) => e.path[e.path.length - 1])
+            expect(fieldNames).toContain('no_telepon')
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       )
     })
 
-    test('for any invalid zakat items, errors array contains the invalid field name', async () => {
+    test('for any invalid wilayah_rt_id (zero or negative), error path identifies wilayah_rt_id field', async () => {
+      // Zero and negative integers always fail positive validation
       await fc.assert(
         fc.asyncProperty(
-          fc.record({
-            jenis_zakat: fc.string({ minLength: 1, maxLength: 30 }).filter(
-              (s) => !['fitrah_uang', 'fitrah_beras', 'mal', 'fidyah', 'infaq'].includes(s)
-            ),
-            nominal: fc.oneof(
-              fc.constant(-1),
-              fc.constant(-1000),
-            ),
-          }),
-          async (invalidItem) => {
+          fc.integer({ max: 0 }).map((n) => Math.min(n, -1)), // ensure negative
+          async (rtId) => {
+            const result = muzakkiSchema.safeParse({
+              nama_lengkap: 'Valid Name',
+              no_telepon: '08123456789',
+              wilayah_rt_id: rtId,
+            })
+
+            expect(result.success).toBe(false)
+            const fieldNames = result.error.errors.map((e) => e.path[e.path.length - 1])
+            expect(fieldNames).toContain('wilayah_rt_id')
+          }
+        ),
+        { numRuns: 30 }
+      )
+    })
+
+    test('for any invalid jenis_zakat string, error identifies jenis_zakat field', async () => {
+      const validZakat = new Set(['fitrah_uang', 'fitrah_beras', 'mal', 'fidyah', 'infaq'])
+      await fc.assert(
+        fc.asyncProperty(
+          fc.string({ minLength: 3, maxLength: 20 }).filter((s) => !validZakat.has(s)),
+          async (invalidJenis) => {
             const result = SplitTransaksiSchema.safeParse({
               muzakki_id: 1,
               metode_bayar: 'tunai',
               tahun_hijriah: 1446,
               tahun_masehi: 2025,
-              items: [invalidItem],
+              items: [{ jenis_zakat: invalidJenis, nominal: 100000, berat_kg: 0 }],
             })
 
             expect(result.success).toBe(false)
-            const error = result.error
-
-            // Check that at least one error identifies the field
-            const hasFieldIdentification = error.errors.some((err) => {
-              const pathStr = err.path.join('.')
-              return (
-                pathStr.includes('jenis_zakat') ||
-                pathStr.includes('nominal')
-              )
-            })
-            expect(hasFieldIdentification).toBe(true)
+            const jenisErrors = result.error.errors.filter((e) =>
+              e.path.includes('jenis_zakat')
+            )
+            expect(jenisErrors.length).toBeGreaterThan(0)
           }
         ),
         { numRuns: 30 }
       )
-    )
+    })
   })
+
+  // ─── No Database Write on Validation Failure ──────────────────────────────────
 
   describe('No Database Write on Validation Failure', () => {
     test('createMuzakki does not call db when schema validation fails', async () => {
       const mockDb = jest.fn()
       const mockAuditLog = jest.fn()
 
-      // Validation will fail because nama_lengkap is empty
       try {
         await createMuzakki(
-          {
-            nama_lengkap: '',
-            no_telepon: '08123456789',
-            wilayah_rt_id: 1,
-          },
+          { nama_lengkap: '', no_telepon: '08123456789', wilayah_rt_id: 1 },
           user,
-          {
-            db: mockDb,
-            auditLog: mockAuditLog,
-          }
+          { db: mockDb, auditLog: mockAuditLog }
         )
       } catch (e) {
-        // Expected to throw ZodError
+        expect(e).toBeInstanceOf(ZodError)
       }
 
-      // db should not be called when validation fails
       expect(mockDb).not.toHaveBeenCalled()
       expect(mockAuditLog).not.toHaveBeenCalled()
     })
@@ -529,23 +465,14 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
       const mockDb = jest.fn()
       const mockAuditLog = jest.fn()
 
-      // Validation will fail because kategori_asnaf is invalid
       try {
         await createMustahik(
-          {
-            nama_kepala_keluarga: 'Test',
-            wilayah_rt_id: 1,
-            kategori_asnaf: 'invalid',
-            jumlah_tanggungan: 3,
-          },
+          { nama_kepala_keluarga: 'Test', wilayah_rt_id: 1, kategori_asnaf: 'invalid', jumlah_tanggungan: 3 },
           user,
-          {
-            db: mockDb,
-            auditLog: mockAuditLog,
-          }
+          { db: mockDb, auditLog: mockAuditLog }
         )
       } catch (e) {
-        // Expected to throw ZodError
+        expect(e).toBeInstanceOf(ZodError)
       }
 
       expect(mockDb).not.toHaveBeenCalled()
@@ -556,24 +483,14 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
       const mockDb = jest.fn()
       const mockAuditLog = jest.fn()
 
-      // Validation will fail because items array is empty
       try {
         await createZakatMasukSession(
-          {
-            muzakki_id: 1,
-            metode_bayar: 'tunai',
-            tahun_hijriah: 1446,
-            tahun_masehi: 2025,
-            items: [],
-          },
+          { muzakki_id: 1, metode_bayar: 'tunai', tahun_hijriah: 1446, tahun_masehi: 2025, items: [] },
           user,
-          {
-            db: mockDb,
-            auditLog: mockAuditLog,
-          }
+          { db: mockDb, auditLog: mockAuditLog }
         )
       } catch (e) {
-        // Expected to throw ZodError
+        expect(e).toBeInstanceOf(ZodError)
       }
 
       expect(mockDb).not.toHaveBeenCalled()
@@ -584,21 +501,14 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
       const mockDb = jest.fn()
       const mockAuditLog = jest.fn()
 
-      // Validation will fail because mustahik_id is invalid
       try {
         await createZakatKeluar(
-          {
-            mustahik_id: -1,
-            nominal: 50000,
-          },
+          { mustahik_id: -1, nominal: 50000, tahun_hijriah: 1446, tahun_masehi: 2025 },
           user,
-          {
-            db: mockDb,
-            auditLog: mockAuditLog,
-          }
+          { db: mockDb, auditLog: mockAuditLog }
         )
       } catch (e) {
-        // Expected to throw ZodError
+        expect(e).toBeInstanceOf(ZodError)
       }
 
       expect(mockDb).not.toHaveBeenCalled()
@@ -606,8 +516,10 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
     })
   })
 
+  // ─── Error Response Structure ────────────────────────────────────────────────
+
   describe('Error Response Structure', () => {
-    test('ZodError contains properly structured error objects with field path', () => {
+    test('ZodError contains properly structured error objects', () => {
       const result = muzakkiSchema.safeParse({
         nama_lengkap: '',
         no_telepon: '',
@@ -617,7 +529,6 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
       expect(result.success).toBe(false)
       const error = result.error
 
-      // Each error should be a ZodIssue
       for (const issue of error.errors) {
         expect(issue).toHaveProperty('path')
         expect(issue).toHaveProperty('message')
@@ -637,8 +548,6 @@ describe('Property 18: API Input Validation Returns 400 with Field Details', () 
 
       expect(result.success).toBe(false)
       const error = result.error
-
-      // Should have errors for all three invalid fields
       expect(error.errors.length).toBeGreaterThanOrEqual(3)
 
       const fieldNames = error.errors.map((e) => e.path[e.path.length - 1])

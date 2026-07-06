@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import api from '@shared/lib/api'
 import {
   Card,
@@ -22,7 +22,6 @@ import { JENIS_ZAKAT, JENIS_ZAKAT_LABELS } from '@shared/constants'
 
 export default function LaporanPage() {
   const { toast } = useToast()
-  const queryClient = useQueryClient()
 
   const [tahunHijriah, setTahunHijriah] = useState('')
   const [tahunMasehi, setTahunMasehi] = useState('')

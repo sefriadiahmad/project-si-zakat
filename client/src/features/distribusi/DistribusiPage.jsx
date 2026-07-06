@@ -52,6 +52,7 @@ export default function DistribusiPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['distribusi-kuota'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       toast({
         title: 'Distribusi Berhasil Dicatat',
         description: 'Pencatatan pengeluaran distribusi berhasil disimpan.',

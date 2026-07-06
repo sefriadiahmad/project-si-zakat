@@ -9,8 +9,6 @@ import {
   CardFooter,
   Input,
   Label,
-  Button,
-  Badge,
   Table,
   TableHeader,
   TableBody,
@@ -18,8 +16,7 @@ import {
   TableHead,
   TableCell,
 } from '@shared/components'
-import { useToast } from '@shared/components/toaster'
-import { Calculator, TrendingUp, Users, Wheat } from 'lucide-react'
+import { Calculator, TrendingUp } from 'lucide-react'
 import { hitungZakat } from './zakatCalculator'
 import { formatCurrency, formatKg } from '@features/dashboard/useDashboardData'
 
@@ -37,7 +34,7 @@ export default function LandingPage() {
     },
   })
 
-  const { data: summaryData, isLoading, error } = useQuery({
+  const { data: summaryData, isLoading } = useQuery({
     queryKey: ['publik-summary'],
     queryFn: async () => {
       const response = await api.get('/publik/summary')
@@ -177,10 +174,7 @@ export default function LandingPage() {
                   <div className="h-4 bg-slate-200 rounded animate-pulse w-1/2" />
                 </div>
               )}
-              {error && (
-                <p className="text-sm text-red-600 font-medium">Gagal memuat data publik.</p>
-              )}
-              {!isLoading && !error && summaryData && (
+{!isLoading && summaryData && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100">
@@ -212,8 +206,8 @@ export default function LandingPage() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {summaryData.chart_muzakki_rt?.map((row, idx) => (
-                            <TableRow key={idx}>
+                          {summaryData.chart_muzakki_rt?.map((row, _idx) => (
+                            <TableRow key={row.nama_rt || row.wilayah_rt_id}>
                               <TableCell className="text-sm text-slate-900">{row.nama_rt}</TableCell>
                               <TableCell className="text-right text-sm text-slate-700">{row.count}</TableCell>
                             </TableRow>

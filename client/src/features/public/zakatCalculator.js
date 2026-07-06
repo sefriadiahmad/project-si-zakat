@@ -6,7 +6,8 @@ export function hitungZakat(input = {}) {
   const A = Number(nilai_harta)
   const N = Number(nilai_nisab)
 
-  if (J < 1 || H < 0 || A < 0 || N < 0) {
+  if (!Number.isFinite(J) || !Number.isFinite(H) || !Number.isFinite(A) || !Number.isFinite(N) ||
+      J < 1 || H < 0 || A < 0 || N < 0) {
     return {
       zakat_fitrah_uang: 0,
       zakat_fitrah_beras: 0,

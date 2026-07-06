@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import api from '@shared/lib/api'
 import {
   Table,
   TableHeader,
@@ -64,6 +65,7 @@ export default function VerifikasiPage() {
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['mustahik'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       const action = variables.action === 'verify' ? 'diverifikasi' : 'ditolak'
       toast({
         title: 'Status Berhasil Diperbarui',

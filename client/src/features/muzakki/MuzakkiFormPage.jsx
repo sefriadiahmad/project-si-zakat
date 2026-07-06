@@ -113,6 +113,7 @@ export default function MuzakkiFormPage() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['muzakki'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       toast({
         title: isEditMode ? 'Muzakki Berhasil Diperbarui' : 'Muzakki Berhasil Terdaftar',
         description: `Muzakki ${data.nama_lengkap} berhasil disimpan.`,

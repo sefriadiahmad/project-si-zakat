@@ -28,7 +28,7 @@ export async function createZakatMasukSession(data, user, dependencies = {}) {
       tahun_masehi: parsed.tahun_masehi,
     }))
 
-    const [inserted] = await trx('zakat_masuk').insert(rows).returning('*')
+    const inserted = await trx('zakat_masuk').insert(rows).returning('*')
     insertedRows = inserted
 
     for (const row of inserted) {
