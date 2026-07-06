@@ -13,6 +13,8 @@ import FunnelFormPage from '@features/transaksi/FunnelForm'
 import SummaryPage from '@features/transaksi/SummaryPage'
 import DistribusiPage from '@features/distribusi/DistribusiPage'
 import LaporanPage from '@features/laporan/LaporanPage'
+import DemografiPage from '@features/demografi/DemografiPage'
+import RTDetailPage from '@features/demografi/RTDetailPage'
 import LandingPage from '@features/public/LandingPage'
 
 function App() {
@@ -41,6 +43,8 @@ function App() {
           <Route path="/mustahik/verifikasi" element={<VerifikasiPage />} />
           <Route path="/distribusi" element={<DistribusiPage />} />
           <Route path="/laporan" element={<LaporanPage />} />
+          <Route path="/demografi" element={<DemografiPage />} />
+          <Route path="/demografi/:rtId" element={<RTDetailPage />} />
         </Route>
       </Route>
 

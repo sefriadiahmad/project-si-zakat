@@ -18,6 +18,7 @@ import distribusiRoutes from './routes/distribusi.routes.js'
 import dashboardRoutes from './routes/dashboard.routes.js'
 import laporanRoutes from './routes/laporan.routes.js'
 import publikRoutes from './routes/publik.routes.js'
+import demografiRoutes from './routes/demografi.routes.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -48,6 +49,7 @@ app.use('/api/distribusi', distribusiRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/laporan', laporanRoutes)
 app.use('/api/publik', publikRoutes)
+app.use('/api/demografi', demografiRoutes)
 
 app.use(notFoundHandler)
 
