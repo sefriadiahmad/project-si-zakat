@@ -1,9 +1,12 @@
-import jsPDF from 'jspdf'
+import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
+
+// Handle different import styles for autoTable
+const createTable = autoTable.default || autoTable
 
 export async function buildPdfLaporan(data, params, opts = {}) {
   const doc = new jsPDF({ format: 'a4', unit: 'mm' })
-  const { MASJID_NAME = 'Masjid example', ADMIN_NAME = '', ADMIN_JABATAN = 'Admin Masjid' } = opts
+  const { MASJID_NAME = 'Masjid Al-Ikhlas', ADMIN_NAME = '', ADMIN_JABATAN = 'Admin Masjid' } = opts
 
   const pageWidth = doc.internal.pageSize.getWidth()
   const margin = 15
@@ -41,7 +44,7 @@ export async function buildPdfLaporan(data, params, opts = {}) {
     item.metode_bayar || '-',
   ])
 
-  autoTable(doc, {
+  createTable(doc, {
     startY: y,
     head: [['Tanggal', 'Nomor Transaksi', 'Muzakki', 'RT', 'Jenis', 'Nominal', 'Beras', 'Metode']],
     body: rows,

@@ -47,6 +47,7 @@ export default function LaporanPage() {
       return response
     },
     onSuccess: (response, variables) => {
+      // eslint-disable-next-line no-undef
       const blob = new Blob([response.data], {
         type: variables.format === 'xlsx'
           ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
