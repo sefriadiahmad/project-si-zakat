@@ -18,17 +18,18 @@ import { generatePdfA4 } from '@shared/lib/pdf'
 import ThermalReceipt from './ThermalReceipt'
 
 export default function SummaryPage() {
-  const { sessionId } = useParams()
+  // URL param is :id from route /transaksi/:id
+  const { id: transactionId } = useParams()
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
   const { data: items = [], isLoading, isError } = useQuery({
-    queryKey: ['zakat-session', sessionId],
+    queryKey: ['zakat-session', transactionId],
     queryFn: async () => {
-      const response = await api.get(`/zakat/masuk/${sessionId}`)
+      const response = await api.get(`/zakat/masuk/${transactionId}`)
       return response.data
     },
-    enabled: Boolean(sessionId),
+    enabled: Boolean(transactionId),
   })
 
   const totalNominal = useMemo(
@@ -42,11 +43,11 @@ export default function SummaryPage() {
 
   const printMutation = useMutation({
     mutationFn: async (printType) => {
-      const response = await api.post(`/zakat/masuk/${sessionId}/print`, { print_type: printType })
+      const response = await api.post(`/zakat/masuk/${transactionId}/print`, { print_type: printType })
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['zakat-session', sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['zakat-session', transactionId] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
     },
     onError: (error) => {
@@ -61,17 +62,17 @@ export default function SummaryPage() {
   const handleDownloadPdf = async () => {
     try {
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), 5000)
+        setTimeout(() => reject(new Error('timeout')), 10000)
       )
       const pdfPromise = generatePdfA4(items, {
-        MASJID_NAME: 'Masjid example',
+        MASJID_NAME: 'Masjid Al-Ikhlas',
         ADMIN_NAME: items[0]?.nama_kasir || '',
       })
 
-      await Promise.race([pdfPromise, timeoutPromise])
+      const doc = await Promise.race([pdfPromise, timeoutPromise])
+      doc.save(`zakat-${transactionId}.pdf`)
 
-      const doc = await pdfPromise
-      doc.save(`zakat-${sessionId}.pdf`)
+      // Record print after successful download
       printMutation.mutate('pdf')
 
       toast({
@@ -81,7 +82,7 @@ export default function SummaryPage() {
     } catch {
       toast({
         variant: 'destructive',
-        title: 'Gagal membuat PDF. Coba lagi.',
+        title: 'Gagal membuat PDF',
         description: 'Terjadi kesalahan saat membuat PDF.',
       })
     }
@@ -90,7 +91,8 @@ export default function SummaryPage() {
   const handlePrint = () => {
     if (!items.length) return
     printMutation.mutate('struk')
-    window.print()
+    // Use setTimeout to allow mutation to complete before print dialog
+    setTimeout(() => window.print(), 100)
   }
 
   const fmt = (v) =>
@@ -129,7 +131,7 @@ export default function SummaryPage() {
         <>
           <Card className="rounded-xl border border-emerald-100 bg-emerald-50/30 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-lg font-bold text-slate-900">Nomor Transaksi: {sessionId}</CardTitle>
+              <CardTitle className="text-lg font-bold text-slate-900">Nomor Transaksi: {transactionId}</CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-2">
               <div className="flex items-center justify-between">
@@ -213,7 +215,7 @@ export default function SummaryPage() {
           </div>
 
           <div className="hidden print:block">
-            <ThermalReceipt session={items} masjidName="Masjid example" />
+            <ThermalReceipt session={items} masjidName="Masjid Al-Ikhlas" />
           </div>
         </>
       )}

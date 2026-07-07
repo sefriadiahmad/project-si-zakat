@@ -38,15 +38,14 @@ export async function getDashboardSummary(queryParams = {}, dependencies = {}) {
     .count('id as total_mustahik_terverifikasi')
     .first()
 
-  const chartMuzakkiRt = await connection('muzakki')
+  const chartMuzakkiRtRows = await connection('muzakki')
     .join('wilayah_rt', 'muzakki.wilayah_rt_id', 'wilayah_rt.id')
     .where('muzakki.is_active', true)
     .groupBy('wilayah_rt.id', 'wilayah_rt.nama_rt')
     .count('muzakki.id as count')
     .select('wilayah_rt.nama_rt', 'count')
-    .first()
 
-  const chartAsnafDonat = await connection('zakat_keluar')
+  const chartAsnafDonatRows = await connection('zakat_keluar')
     .join('mustahik_asnaf', 'zakat_keluar.mustahik_id', 'mustahik_asnaf.id')
     .groupBy('mustahik_asnaf.kategori_asnaf')
     .sum({
@@ -54,18 +53,17 @@ export async function getDashboardSummary(queryParams = {}, dependencies = {}) {
       total_beras: connection.raw("CASE WHEN berat_kg IS NOT NULL THEN berat_kg ELSE 0 END"),
     })
     .select('mustahik_asnaf.kategori_asnaf', 'total_nominal', 'total_beras')
-    .first()
 
   return {
     total_nominal: Number(summary?.total_nominal || 0),
     total_beras: Number(summary?.total_beras || 0),
     total_muzakki_aktif: Number(muzakkiCount?.total_muzakki_aktif || 0),
     total_mustahik_terverifikasi: Number(mustahikCount?.total_mustahik_terverifikasi || 0),
-    chart_muzakki_rt: chartMuzakkiRt.map((row) => ({
+    chart_muzakki_rt: chartMuzakkiRtRows.map((row) => ({
       nama_rt: row.nama_rt,
       count: Number(row.count),
     })),
-    chart_asnaf_donat: chartAsnafDonat.map((row) => ({
+    chart_asnaf_donat: chartAsnafDonatRows.map((row) => ({
       kategori_asnaf: row.kategori_asnaf,
       total_nominal: Number(row.total_nominal || 0),
       total_beras: Number(row.total_beras || 0),

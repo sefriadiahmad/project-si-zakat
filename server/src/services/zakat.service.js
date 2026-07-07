@@ -73,16 +73,20 @@ export async function markZakatSessionPrinted(sessionId, printType, userId, depe
     throw new AppError('Transaksi tidak ditemukan', 404, ErrorCodes.NOT_FOUND)
   }
 
+  // Get timestamp once before transaction to avoid circular reference
+  const now = new Date().toISOString()
+
   await connection.transaction(async (trx) => {
     await trx('zakat_masuk')
       .where({ session_id: sessionId })
       .update({
-        print_at: trx.fn.now(),
+        print_at: now,
         print_type: printType,
       })
 
+    // Log payload without circular reference
     await logMutation(trx, userId, 'UPDATE', 'zakat_masuk', existing.id, {
-      print_at: trx.fn.now(),
+      print_at: now,
       print_type: printType,
     })
   })

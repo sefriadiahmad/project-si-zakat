@@ -168,7 +168,7 @@ export default function VerifikasiPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-slate-500">{formatDate(mustahik.created_at)}</TableCell>
-                  <TableCell className="flex justify-end gap-2">
+                  <TableCell className="flex justify-end gap-2 bg">
                     <Dialog open={verifyDialogOpen && selectedMustahik?.id === mustahik.id} onOpenChange={setVerifyDialogOpen}>
                       <DialogTrigger asChild>
                         <Button
@@ -181,7 +181,7 @@ export default function VerifikasiPage() {
                           Verifikasi
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="sm:max-w-lg sm:w-full bg-white rounded-lg shadow-lg border border-slate-200">
                         <DialogHeader>
                           <DialogTitle>Konfirmasi Verifikasi</DialogTitle>
                           <DialogDescription>
@@ -216,7 +216,7 @@ export default function VerifikasiPage() {
                           Tolak
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="sm:max-w-lg sm:w-full bg-white rounded-lg shadow-lg border border-slate-200">
                         <DialogHeader>
                           <DialogTitle>Konfirmasi Penolakan</DialogTitle>
                           <DialogDescription>

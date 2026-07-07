@@ -25,6 +25,12 @@ import { JENIS_ZAKAT, JENIS_ZAKAT_LABELS, METODE_BAYAR, METODE_BAYAR_LABELS } fr
 
 const STEP_LABELS = ['Pilih Muzakki', 'Pilih & Isi Item', 'Metode Bayar', 'Review & Konfirmasi']
 
+// Helper: Calculate approximate Hijri year from Gregorian year
+// Formula: Hijri ≈ Gregorian - 622 + (Gregorian - 622) / 33
+function getApproximateHijriYear(gregorianYear = new Date().getFullYear()) {
+  return Math.round(gregorianYear - 622 + (gregorianYear - 622) / 33)
+}
+
 const emptyItem = () => ({
   jenis_zakat: 'fitrah_uang',
   nominal: 0,
@@ -44,7 +50,7 @@ export default function FunnelFormPage() {
   const [items, setItems] = useState([])
   const [metodeBayar, setMetodeBayar] = useState('tunai')
   const [noReferensi, setNoReferensi] = useState('')
-  const [tahunHijriah, setTahunHijriah] = useState(new Date().getFullYear())
+  const [tahunHijriah, setTahunHijriah] = useState(getApproximateHijriYear())
   const [tahunMasehi, setTahunMasehi] = useState(new Date().getFullYear())
 
   const { totalNominal, totalBeras } = useTotalCalc(items)
@@ -126,8 +132,8 @@ export default function FunnelFormPage() {
       muzakki_id: selectedMuzakki.id,
       metode_bayar: metodeBayar,
       no_referensi: noReferensi || undefined,
-      tahun_hijriah,
-      tahun_masehi,
+      tahun_hijriah: tahunHijriah,
+      tahun_masehi: tahunMasehi,
       items: items.map((item) => ({
         jenis_zakat: item.jenis_zakat,
         nominal: item.nominal || 0,
