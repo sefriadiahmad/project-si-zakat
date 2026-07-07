@@ -81,10 +81,20 @@ export async function verifikasiMustahik(id, data, user, dependencies = {}) {
   const connection = dependencies.db || db
   const logMutation = dependencies.auditLog || auditLog
 
+  // Validate input
   const parsed = mustahikVerifikasiSchema.parse(data)
+
+  // Check user has required fields
+  if (!user || !user.id) {
+    throw new AppError('Autentikasi diperlukan', 401, 'UNAUTHORIZED')
+  }
+
+  // Use ISO string for PostgreSQL compatibility
+  const now = new Date().toISOString()
 
   let updatedMustahik
   await connection.transaction(async (trx) => {
+    // Get existing record
     const record = await trx('mustahik_asnaf').where({ id }).first()
     if (!record) {
       throw new AppError('Mustahik tidak ditemukan', 404, ErrorCodes.NOT_FOUND)
@@ -103,16 +113,16 @@ export async function verifikasiMustahik(id, data, user, dependencies = {}) {
         ? {
             status_verifikasi: 'terverifikasi',
             verified_by: user.id,
-            verified_at: connection.fn.now(),
+            verified_at: now,
             alasan_penolakan: null,
-            updated_at: connection.fn.now(),
+            updated_at: now,
           }
         : {
             status_verifikasi: 'ditolak',
             alasan_penolakan: parsed.alasan_penolakan,
             verified_by: user.id,
-            verified_at: connection.fn.now(),
-            updated_at: connection.fn.now(),
+            verified_at: now,
+            updated_at: now,
           }
 
     const [inserted] = await trx('mustahik_asnaf')
@@ -121,7 +131,14 @@ export async function verifikasiMustahik(id, data, user, dependencies = {}) {
       .returning('*')
 
     updatedMustahik = inserted
-    await logMutation(trx, user.id, 'UPDATE', 'mustahik_asnaf', id, updatePayload)
+
+    // Log payload tanpa timestamp circular reference
+    const logPayload = {
+      ...updatePayload,
+      verified_at: now,
+      updated_at: now,
+    }
+    await logMutation(trx, user.id, 'UPDATE', 'mustahik_asnaf', id, logPayload)
   })
 
   return updatedMustahik

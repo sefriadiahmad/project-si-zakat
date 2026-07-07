@@ -93,6 +93,8 @@ function makeMockDb(insertResult) {
   db.transaction = function (cb) {
     const trxFn = function (tbl) { return chainable }
     trxFn._chainable = chainable
+    // Note: fn.now() is no longer used in verifikasiMustahik, using new Date() instead
+    trxFn.fn = { now: function () { return new Date().toISOString() } }
     return cb(trxFn)
   }
   db.fn = { now: function () { return new Date().toISOString() } }

@@ -69,6 +69,12 @@ router.patch('/:id/verifikasi', requireAdmin, asyncHandler(async (req, res) => {
   if (Number.isNaN(id)) {
     throw new AppError('ID tidak valid', 400, ErrorCodes.VALIDATION_ERROR)
   }
+
+  // Log the request for debugging
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Verifikasi request:', { id, body: req.body, userId: req.user?.id })
+  }
+
   const result = await verifikasiMustahik(id, req.body, req.user)
   res.json(result)
 }))

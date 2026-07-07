@@ -4,14 +4,12 @@ import { AppError } from '../utils/errors.js'
  * Global error handler middleware
  */
 export function errorHandler(err, req, res, next) {
-  // Log error for debugging
-  if (process.env.NODE_ENV !== 'test') {
-    console.error('Error:', {
-      message: err.message,
-      code: err.code,
-      stack: err.stack,
-    })
-  }
+  // Log error for debugging (always log in development)
+  console.error('=== ERROR ===')
+  console.error('Message:', err.message)
+  console.error('Code:', err.code)
+  console.error('Status:', err.statusCode)
+  console.error('Stack:', err.stack)
 
   // Handle Zod validation errors
   if (err.name === 'ZodError') {
@@ -48,6 +46,14 @@ export function errorHandler(err, req, res, next) {
     return res.status(400).json({
       message: 'Data referensi tidak ditemukan',
       code: 'FOREIGN_KEY_VIOLATION',
+    })
+  }
+
+  if (err.code === '23502') {
+    // Not null violation
+    return res.status(400).json({
+      message: `Kolom tidak boleh kosong: ${err.constraint || 'unknown'}`,
+      code: 'NOT_NULL_VIOLATION',
     })
   }
 
