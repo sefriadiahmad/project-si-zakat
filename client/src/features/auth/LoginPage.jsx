@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { LockKeyhole, LogIn, User } from 'lucide-react'
+import { LockKeyhole, LogIn, User, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom'
 import { z } from 'zod'
 import { Button } from '@shared/components/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/components/card'
@@ -20,6 +20,7 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [apiError, setApiError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const from = location.state?.from?.pathname || '/dashboard'
 
   const {
@@ -51,9 +52,11 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-8 sm:px-6 lg:px-8">
-        <section className="grid w-full gap-8 lg:grid-cols-[1fr_420px] lg:items-center">
-          <div className="hidden lg:block">
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl px-4 py-8 sm:px-6 lg:py-0 lg:px-8">
+        {/* Mobile: Kembali button di atas */}
+        <div className="flex w-full flex-col items-center justify-center gap-6 lg:flex-row lg:gap-8">
+          {/* Desktop: Teks di kiri, Mobile: Teks disembunyikan di sini */}
+          <div className="hidden lg:block lg:w-1/2">
             <p className="mb-3 text-sm font-medium text-emerald-700">Sistem Informasi Zakat</p>
             <h1 className="max-w-2xl text-4xl font-semibold leading-tight text-slate-950">
               Operasional zakat masjid dalam satu ruang kerja yang tertib.
@@ -63,11 +66,24 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <Card className="rounded-lg border-slate-200 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-xl">Masuk</CardTitle>
-              <CardDescription>Gunakan akun Admin Masjid atau Kasir Amil.</CardDescription>
-            </CardHeader>
+          {/* Form Login Card */}
+          <div className="flex w-full flex-col gap-4 lg:w-[420px]">
+            {/* Mobile: Kembali button */}
+            <div>
+              <Link
+                to="/"
+                className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-emerald-600 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Kembali ke Beranda
+              </Link>
+            </div>
+
+            <Card className="rounded-lg border-slate-200 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-xl">Masuk</CardTitle>
+                <CardDescription>Gunakan akun Admin Masjid atau Kasir Amil.</CardDescription>
+              </CardHeader>
             <CardContent>
               <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
                 <div className="space-y-2">
@@ -94,13 +110,25 @@ export default function LoginPage() {
                     <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
                       id="password"
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       autoComplete="current-password"
                       maxLength={50}
-                      className="pl-9"
+                      className="pl-9 pr-10"
                       aria-invalid={Boolean(errors.password)}
                       {...register('password')}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
                   </div>
                   {errors.password ? (
                     <p className="text-sm text-red-600">{errors.password.message}</p>
@@ -120,7 +148,19 @@ export default function LoginPage() {
               </form>
             </CardContent>
           </Card>
-        </section>
+
+            {/* Mobile: Teks di bawah card */}
+            <div className="lg:hidden text-center mt-6">
+              <p className="mb-2 text-sm font-medium text-emerald-700">Sistem Informasi Zakat</p>
+              <h2 className="text-xl font-semibold text-slate-900">
+                Operasional zakat masjid dalam satu ruang kerja yang tertib.
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Masuk untuk mengelola data muzakki, mustahik, transaksi, distribusi, dan laporan sesuai peran akun.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   )
