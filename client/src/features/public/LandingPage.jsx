@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import api from '@shared/lib/api'
+import { Button } from '@shared/components'
 import {
   Card,
   CardHeader,
@@ -16,11 +18,13 @@ import {
   TableHead,
   TableCell,
 } from '@shared/components'
-import { Calculator, TrendingUp } from 'lucide-react'
+import { Calculator, TrendingUp, LogIn, LayoutDashboard, Activity } from 'lucide-react'
+import { useAuth } from '@features/auth/AuthContext'
 import { hitungZakat } from './zakatCalculator'
 import { formatCurrency, formatKg } from '@features/dashboard/useDashboardData'
 
 export default function LandingPage() {
+  const { isAuthenticated } = useAuth()
   const [jumlahJiwa, setJumlahJiwa] = useState(1)
   const [hargaBeras, setHargaBeras] = useState(12000)
   const [nilaiHarta, setNilaiHarta] = useState(0)
@@ -44,6 +48,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (configData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHargaBeras(configData.harga_beras_per_kg || 12000)
       setNilaiNisab(configData.nilai_nisab || 5240000)
     }
@@ -59,7 +64,45 @@ export default function LandingPage() {
   const isInvalidInput = jumlahJiwa < 1 || hargaBeras < 0 || nilaiHarta < 0 || nilaiNisab < 0
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+    <>
+      {/* Navbar Fixed */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Kiri: Logo dan Nama Aplikasi */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-9 h-9 bg-emerald-600 rounded-lg shadow-sm">
+                <Activity className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-lg font-bold text-slate-900 tracking-tight">
+                Sistem Informasi Zakat
+              </span>
+            </div>
+
+            {/* Kanan: Tombol Login / Masuk Dashboard */}
+            <div>
+              {isAuthenticated ? (
+                <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
+                  <Link to="/dashboard">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Masuk Dashboard
+                  </Link>
+                </Button>
+              ) : (
+                <Button asChild variant="outline" className="border-emerald-600 text-emerald-700 hover:bg-emerald-50 gap-2">
+                  <Link to="/login">
+                    <LogIn className="h-4 w-4" />
+                    Login
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content dengan padding-top untuk navbar */}
+      <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 pt-16">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-slate-900 mb-4">Sistem Informasi Zakat</h1>
@@ -227,5 +270,6 @@ export default function LandingPage() {
         </footer>
       </div>
     </main>
+    </>
   )
 }
