@@ -5,19 +5,19 @@ export async function getDashboardSummary(queryParams = {}, dependencies = {}) {
   const connection = dependencies.db || db
   const parsed = DashboardQuerySchema.parse(queryParams)
 
-  const baseMasuk = connection('zakat_masuk')
-  const baseKeluar = connection('zakat_keluar')
+  let queryMasuk = connection('zakat_masuk')
+  let queryKeluar = connection('zakat_keluar')
 
   if (parsed.tahun_hijriah) {
-    baseMasuk.where('zakat_masuk.tahun_hijriah', parsed.tahun_hijriah)
-    baseKeluar.where('zakat_keluar.tahun_hijriah', parsed.tahun_hijriah)
+    queryMasuk = queryMasuk.where('tahun_hijriah', parsed.tahun_hijriah)
+    queryKeluar = queryKeluar.where('tahun_hijriah', parsed.tahun_hijriah)
   }
   if (parsed.tahun_masehi) {
-    baseMasuk.where('zakat_masuk.tahun_masehi', parsed.tahun_masehi)
-    baseKeluar.where('zakat_keluar.tahun_masehi', parsed.tahun_masehi)
+    queryMasuk = queryMasuk.where('tahun_masehi', parsed.tahun_masehi)
+    queryKeluar = queryKeluar.where('tahun_masehi', parsed.tahun_masehi)
   }
 
-  const [summary] = await baseMasuk.clone()
+  const summary = await queryMasuk
     .sum({
       total_nominal: connection.raw(
         "CASE WHEN jenis_zakat IN ('fitrah_uang','mal','fidyah','infaq') THEN nominal ELSE 0 END"
@@ -28,12 +28,12 @@ export async function getDashboardSummary(queryParams = {}, dependencies = {}) {
     })
     .first()
 
-  const [muzakkiCount] = await connection('muzakki')
+  const muzakkiCount = await connection('muzakki')
     .where('is_active', true)
     .count('id as total_muzakki_aktif')
     .first()
 
-  const [mustahikCount] = await connection('mustahik_asnaf')
+  const mustahikCount = await connection('mustahik_asnaf')
     .where('status_verifikasi', 'terverifikasi')
     .count('id as total_mustahik_terverifikasi')
     .first()

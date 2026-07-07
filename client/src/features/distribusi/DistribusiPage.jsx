@@ -34,7 +34,7 @@ export default function DistribusiPage() {
   const [nominal, setNominal] = useState('')
   const [beratKg, setBeratKg] = useState('')
   const [keterangan, setKeterangan] = useState('')
-  const [tahunHijriah, setTahunHijriah] = useState(new Date().getFullYear())
+  const [tahunHijriah, setTahunHijriah] = useState(1447)
   const [tahunMasehi, setTahunMasehi] = useState(new Date().getFullYear())
 
   const { data: kuotaData, isLoading, isError } = useQuery({
@@ -47,7 +47,7 @@ export default function DistribusiPage() {
 
   const createMutation = useMutation({
     mutationFn: async (payload) => {
-      const response = await api.post('/zakat/keluar', payload)
+      const response = await api.post('/distribusi/zakat-keluar', payload)
       return response.data
     },
     onSuccess: () => {
@@ -87,8 +87,8 @@ export default function DistribusiPage() {
       nominal: nominal ? Number(nominal) : 0,
       berat_kg: beratKg ? Number(beratKg) : 0,
       keterangan: keterangan || null,
-      tahun_hijriah,
-      tahun_masehi,
+      tahun_hijriah: tahunHijriah,
+      tahun_masehi: tahunMasehi,
     })
   }
 

@@ -6,15 +6,18 @@ import { ZakatKeluarSchema } from '../schemas/distribusi.schema.js'
 export async function hitungKuota(tahunHijriah, tahunMasehi, dependencies = {}) {
   const connection = dependencies.db || db
 
-  const [masuk] = await connection('zakat_masuk')
-    .where(function () {
-      if (tahunHijriah) {
-        this.where('tahun_hijriah', parseInt(tahunHijriah, 10))
-      }
-      if (tahunMasehi) {
-        this.where('tahun_masehi', parseInt(tahunMasehi, 10))
-      }
-    })
+  // Build query base
+  let query = connection('zakat_masuk')
+
+  // Apply filters if provided
+  if (tahunHijriah) {
+    query = query.where('tahun_hijriah', parseInt(tahunHijriah, 10))
+  }
+  if (tahunMasehi) {
+    query = query.where('tahun_masehi', parseInt(tahunMasehi, 10))
+  }
+
+  const masuk = await query
     .sum({
       total_uang: connection.raw(
         "CASE WHEN jenis_zakat IN ('fitrah_uang','mal','fidyah','infaq') THEN nominal ELSE 0 END"
@@ -25,7 +28,7 @@ export async function hitungKuota(tahunHijriah, tahunMasehi, dependencies = {}) 
     })
     .first()
 
-  const [mustahik] = await connection('mustahik_asnaf')
+  const mustahik = await connection('mustahik_asnaf')
     .where('status_verifikasi', 'terverifikasi')
     .sum({ total_tanggungan: 'jumlah_tanggungan' })
     .first()
@@ -43,7 +46,7 @@ export async function hitungKuota(tahunHijriah, tahunMasehi, dependencies = {}) 
     kuota_beras_per_jiwa: Number((totalBeras / totalTanggungan).toFixed(3)),
     total_uang_masuk: totalUang,
     total_beras_masuk: totalBeras,
-    total_tanggungan,
+    total_tanggungan: totalTanggungan,
   }
 }
 
@@ -62,7 +65,7 @@ export async function getDistribusiKuota(queryParams = {}, dependencies = {}) {
   const connection = dependencies.db || db
   const { tahun_hijriah, tahun_masehi } = queryParams
 
-  const kuota = await hitungKuota(tahunHijriah, tahunMasehi, { db: connection })
+  const kuota = await hitungKuota(tahun_hijriah, tahun_masehi, { db: connection })
 
   const mustahikList = await connection('mustahik_asnaf')
     .where('status_verifikasi', 'terverifikasi')

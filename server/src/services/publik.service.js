@@ -5,19 +5,19 @@ export async function getPublikSummary(queryParams = {}, dependencies = {}) {
   const connection = dependencies.db || db
   const parsed = PublikSummaryQuerySchema.parse(queryParams)
 
-  const baseMasuk = connection('zakat_masuk')
-  const baseKeluar = connection('zakat_keluar')
+  let queryMasuk = connection('zakat_masuk')
+  let queryKeluar = connection('zakat_keluar')
 
   if (parsed.tahun_hijriah) {
-    baseMasuk.where('zakat_masuk.tahun_hijriah', parsed.tahun_hijriah)
-    baseKeluar.where('zakat_keluar.tahun_hijriah', parsed.tahun_hijriah)
+    queryMasuk = queryMasuk.where('tahun_hijriah', parsed.tahun_hijriah)
+    queryKeluar = queryKeluar.where('tahun_hijriah', parsed.tahun_hijriah)
   }
   if (parsed.tahun_masehi) {
-    baseMasuk.where('zakat_masuk.tahun_masehi', parsed.tahun_masehi)
-    baseKeluar.where('zakat_keluar.tahun_masehi', parsed.tahun_masehi)
+    queryMasuk = queryMasuk.where('tahun_masehi', parsed.tahun_masehi)
+    queryKeluar = queryKeluar.where('tahun_masehi', parsed.tahun_masehi)
   }
 
-  const [summary] = await baseMasuk.clone()
+  const summary = await queryMasuk
     .sum({
       total_nominal: connection.raw(
         "CASE WHEN jenis_zakat IN ('fitrah_uang','mal','fidyah','infaq') THEN nominal ELSE 0 END"
@@ -35,7 +35,7 @@ export async function getPublikSummary(queryParams = {}, dependencies = {}) {
     .count('muzakki.id as count')
     .select('wilayah_rt.nama_rt', 'count')
 
-  const chartAsnafDonat = await baseKeluar.clone()
+  const chartAsnafDonat = await queryKeluar
     .join('mustahik_asnaf', 'zakat_keluar.mustahik_id', 'mustahik_asnaf.id')
     .groupBy('mustahik_asnaf.kategori_asnaf')
     .sum({
@@ -63,7 +63,7 @@ export async function getKalkulatorConfig(dependencies = {}) {
   const connection = dependencies.db || db
 
   try {
-    const [config] = await connection('kalkulator_config')
+    const config = await connection('kalkulator_config')
       .where('is_active', true)
       .orderBy('updated_at', 'desc')
       .first()

@@ -36,7 +36,7 @@ export async function getLaporanExportData(queryParams, dependencies = {}) {
 
   return {
     params: parsed,
-    data,
-    total: data.length,
+    data: data || [],
+    total: (data || []).length,
   }
 }

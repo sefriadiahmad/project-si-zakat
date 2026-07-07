@@ -1,161 +1,191 @@
 import { jest } from '@jest/globals'
 
 export function buildZakatMockDb(rows = []) {
-  const db = function (table) {
-    db._currentTable = table
-    db._filters = []
-    db._groupBy = []
-    db._select = []
-    db._limit = undefined
-    db._offset = undefined
-    db._orderBy = undefined
-    db._joins = []
-    db._sumObj = undefined
-    return db
-  }
+  // Store the rows
+  const storedRows = [...rows]
 
-  db._rows = rows
+  // Create a factory function that returns fresh query builders
+  function createQueryBuilder() {
+    const qb = function (table) {
+      // Reset state for new query chain
+      qb._table = table
+      qb._rows = storedRows
+      qb._filters = []
+      qb._groupBy = []
+      qb._select = []
+      qb._limit = undefined
+      qb._offset = undefined
+      qb._orderBy = undefined
+      qb._joins = []
+      qb._sumObj = undefined
+      qb._calledFirst = false
+      return qb
+    }
 
-  db.where = jest.fn(function (col, op, val) {
-    db._filters.push({ col, op, val })
-    return db
-  })
+    qb.where = jest.fn(function (col, op, val) {
+      qb._filters.push({ col, op, val })
+      return qb
+    })
 
-  db.whereNot = jest.fn(function () { return db })
+    qb.whereNot = jest.fn(function () { return qb })
 
-  db.groupBy = jest.fn(function (...cols) {
-    db._groupBy = cols
-    return db
-  })
+    qb.groupBy = jest.fn(function (...cols) {
+      qb._groupBy = cols
+      return qb
+    })
 
-  db.select = jest.fn(function (...cols) {
-    db._select.push(...cols.map((c) => (typeof c === 'string' ? { type: 'column', name: c } : c)))
-    return db
-  })
+    qb.select = jest.fn(function (...cols) {
+      qb._select.push(...cols.map((c) => (typeof c === 'string' ? { type: 'column', name: c } : c)))
+      return qb
+    })
 
-  db.count = jest.fn(function (alias) {
-    db._select.push({ type: 'count', alias })
-    return db
-  })
+    qb.count = jest.fn(function (alias) {
+      qb._select.push({ type: 'count', alias })
+      return qb
+    })
 
-  db.sum = jest.fn(function (obj) {
-    db._sumObj = obj
-    return db
-  })
+    qb.sum = jest.fn(function (obj) {
+      qb._sumObj = obj
+      return qb
+    })
 
-  db.first = jest.fn(function () {
-    return db
-  })
+    qb.first = jest.fn(function () {
+      qb._calledFirst = true
+      return qb
+    })
 
-  db.limit = jest.fn(function (n) {
-    db._limit = n
-    return db
-  })
+    qb.limit = jest.fn(function (n) {
+      qb._limit = n
+      return qb
+    })
 
-  db.offset = jest.fn(function (n) {
-    db._offset = n
-    return db
-  })
+    qb.offset = jest.fn(function (n) {
+      qb._offset = n
+      return qb
+    })
 
-  db.orderBy = jest.fn(function (col, dir) {
-    db._orderBy = { col, dir }
-    return db
-  })
+    qb.orderBy = jest.fn(function (col, dir) {
+      qb._orderBy = { col, dir }
+      return qb
+    })
 
-  db.join = jest.fn(function (table, left, right) {
-    db._joins.push({ table, left, right })
-    return db
-  })
+    qb.join = jest.fn(function (table, left, right) {
+      qb._joins.push({ table, left, right })
+      return qb
+    })
 
-  db.clone = jest.fn(function () {
-    const cloned = buildZakatMockDb(db._rows)
-    cloned._filters = [...db._filters]
-    cloned._groupBy = [...db._groupBy]
-    cloned._select = [...db._select]
-    cloned._limit = db._limit
-    cloned._offset = db._offset
-    cloned._orderBy = db._orderBy
-    cloned._joins = [...db._joins]
-    cloned._sumObj = db._sumObj
-    return cloned
-  })
+    qb.clone = jest.fn(function () {
+      // Clone creates a new query builder with same state
+      const cloned = createQueryBuilder()
+      cloned._filters = [...qb._filters]
+      cloned._groupBy = [...qb._groupBy]
+      cloned._select = [...qb._select]
+      cloned._limit = qb._limit
+      cloned._offset = qb._offset
+      cloned._orderBy = qb._orderBy
+      cloned._joins = [...qb._joins]
+      cloned._sumObj = qb._sumObj
+      return cloned
+    })
 
-  db.raw = jest.fn((sql) => ({ raw: sql }))
-  db.fn = { now: jest.fn(() => new Date().toISOString()) }
+    qb.raw = jest.fn((sql) => ({ raw: sql }))
+    qb.fn = { now: jest.fn(() => new Date().toISOString()) }
 
-  db.then = function (resolve, reject) {
-    try {
-      let result
-      if (db._groupBy.length > 0) {
-        if (db._sumObj) {
-          const filtered = applyFilters(db._rows, db._filters)
-          const grouped = applyGroupBy(filtered, db._groupBy)
-          result = grouped.map((g) => {
-            const obj = {}
-            db._groupBy.forEach((c) => {
-              const col = c.includes('.') ? c.split('.')[1] : c
-              obj[col] = g[col]
+    qb.then = function (resolve, reject) {
+      try {
+        let result
+
+        // Group by queries
+        if (qb._groupBy.length > 0) {
+          if (qb._sumObj) {
+            const filtered = applyFilters(qb._rows, qb._filters)
+            const grouped = applyGroupBy(filtered, qb._groupBy)
+            result = grouped.map((g) => {
+              const obj = {}
+              qb._groupBy.forEach((c) => {
+                const col = c.includes('.') ? c.split('.')[1] : c
+                obj[col] = g[col]
+              })
+              for (const [key, expr] of Object.entries(qb._sumObj)) {
+                if (typeof expr === 'object' && expr.raw) {
+                  obj[key] = computeCASE(expr.raw, g)
+                } else {
+                  obj[key] = g.reduce((acc, r) => acc + (Number(r[expr]) || 0), 0)
+                }
+              }
+              return obj
             })
-            for (const [key, expr] of Object.entries(db._sumObj)) {
+          } else {
+            const filtered = applyFilters(qb._rows, qb._filters)
+            const grouped = applyGroupBy(filtered, qb._groupBy)
+            result = grouped.map((g) => {
+              const obj = {}
+              qb._groupBy.forEach((c) => {
+                const col = c.includes('.') ? c.split('.')[1] : c
+                obj[col] = g[col]
+              })
+              qb._select.forEach((sel) => {
+                if (sel.type === 'count') {
+                  obj[sel.alias || 'count'] = g.length
+                } else if (sel.type === 'column') {
+                  const col = sel.name.includes('.') ? sel.name.split('.')[1] : sel.name
+                  obj[col] = g[col]
+                }
+              })
+              return obj
+            })
+          }
+          return Promise.resolve(result).then(resolve, reject)
+        }
+
+        const filtered = applyFilters(qb._rows, qb._filters)
+        const limited = qb._limit ? filtered.slice(0, qb._limit) : filtered
+
+        // Handle .first() specifically
+        if (qb._calledFirst) {
+          if (qb._sumObj) {
+            result = {}
+            for (const [key, expr] of Object.entries(qb._sumObj)) {
               if (typeof expr === 'object' && expr.raw) {
-                obj[key] = computeCASE(expr.raw, g)
+                result[key] = computeCASE(expr.raw, filtered)
               } else {
-                obj[key] = g.reduce((acc, r) => acc + (Number(r[expr]) || 0), 0)
+                result[key] = filtered.reduce((acc, r) => acc + (Number(r[expr]) || 0), 0)
               }
             }
-            return obj
-          })
-        } else {
-          const filtered = applyFilters(db._rows, db._filters)
-          const grouped = applyGroupBy(filtered, db._groupBy)
-          result = grouped.map((g) => {
-            const obj = {}
-            db._groupBy.forEach((c) => {
-              const col = c.includes('.') ? c.split('.')[1] : c
-              obj[col] = g[col]
-            })
-            db._select.forEach((sel) => {
-              if (sel.type === 'count') {
-                obj[sel.alias || 'count'] = g.length
-              } else if (sel.type === 'column') {
-                const col = sel.name.includes('.') ? sel.name.split('.')[1] : sel.name
-                obj[col] = g[col]
-              }
-            })
-            return obj
-          })
+            // sum().first() returns single object
+            return Promise.resolve(result).then(resolve, reject)
+          } else {
+            // first() returns single row or null
+            result = limited[0] || null
+            return Promise.resolve(result).then(resolve, reject)
+          }
         }
+
+        // Regular query returns array
+        result = limited
         return Promise.resolve(result).then(resolve, reject)
+      } catch (error) {
+        return Promise.reject(error).then(reject, reject)
       }
-
-    const filtered = applyFilters(db._rows, db._filters)
-    const limited = db._limit ? filtered.slice(0, db._limit) : filtered
-
-    if (db._sumObj && db.first.mock.calls.length > 0) {
-      result = {}
-      for (const [key, expr] of Object.entries(db._sumObj)) {
-        if (typeof expr === 'object' && expr.raw) {
-          result[key] = computeCASE(expr.raw, filtered)
-        } else {
-          result[key] = filtered.reduce((acc, r) => acc + (Number(r[expr]) || 0), 0)
-        }
-      }
-      return Promise.resolve([result]).then(resolve, reject)
     }
 
-    if (db.first.mock.calls.length > 0) {
-      result = limited[0] || null
-      return Promise.resolve(Array.isArray(result) ? result : [result]).then(resolve, reject)
-    }
-
-    result = limited
-    return Promise.resolve(result).then(resolve, reject)
-    } catch (error) {
-      return Promise.reject(error).then(reject, reject)
-    }
+    return qb
   }
 
-  return db
+  // The db function creates a fresh query builder each time it's called
+  const db = createQueryBuilder()
+
+  // Override the function itself to create fresh builders
+  const dbProxy = function (table) {
+    const builder = createQueryBuilder()
+    return builder(table)
+  }
+
+  // Copy properties needed for fn and raw
+  dbProxy.raw = db.raw
+  dbProxy.fn = db.fn
+
+  return dbProxy
 }
 
 function applyFilters(rows, filters) {

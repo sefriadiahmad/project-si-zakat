@@ -107,6 +107,7 @@ export async function updateMuzakki(id, data, user, dependencies = {}) {
     throw new AppError('Nomor telepon sudah terdaftar untuk muzakki lain', 400, ErrorCodes.PHONE_EXISTS)
   }
 
+  const now = new Date().toISOString()
   let updatedMuzakki
   await connection.transaction(async (trx) => {
     const record = await trx('muzakki').where({ id }).first()
@@ -122,7 +123,7 @@ export async function updateMuzakki(id, data, user, dependencies = {}) {
         wilayah_rt_id: parsed.wilayah_rt_id,
         alamat_detail: parsed.alamat_detail,
         catatan: parsed.catatan,
-        updated_at: connection.fn.now(),
+        updated_at: now,
       })
       .returning('*')
 
@@ -141,6 +142,7 @@ export async function toggleMuzakkiStatus(id, isActive, user, dependencies = {})
     throw new AppError('Field is_active harus berupa boolean', 400, ErrorCodes.VALIDATION_ERROR)
   }
 
+  const now = new Date().toISOString()
   let updatedMuzakki
   await connection.transaction(async (trx) => {
     const record = await trx('muzakki').where({ id }).first()
@@ -152,7 +154,7 @@ export async function toggleMuzakkiStatus(id, isActive, user, dependencies = {})
       .where({ id })
       .update({
         is_active: isActive,
-        updated_at: connection.fn.now(),
+        updated_at: now,
       })
       .returning('*')
 
