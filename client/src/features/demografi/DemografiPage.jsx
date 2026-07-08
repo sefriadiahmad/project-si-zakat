@@ -1,6 +1,6 @@
+/* eslint-disable react-hooks/static-components */
 import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { ArrowUpDown, ChevronRight, MapPin, Users, UserCheck, TrendingUp, TrendingDown } from 'lucide-react'
+import { ArrowUpDown, MapPin, Users, UserCheck, TrendingUp, TrendingDown } from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -366,9 +366,6 @@ export default function DemografiPage() {
                         <SortIcon field="rasio_muzakki_mustahik" />
                       </button>
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase text-slate-600 tracking-wider">
-                      Aksi
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -428,14 +425,6 @@ export default function DemografiPage() {
                           >
                             {formatRasio(rt.rasio_muzakki_mustahik)}
                           </span>
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <Link to={`/demografi/${rt.rt_id}`}>
-                            <Button variant="ghost" size="sm" className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
-                              Detail
-                              <ChevronRight className="h-4 w-4 ml-1" />
-                            </Button>
-                          </Link>
                         </td>
                       </tr>
                     ))
