@@ -33,7 +33,7 @@ export async function getPublikSummary(queryParams = {}, dependencies = {}) {
     .where('muzakki.is_active', true)
     .groupBy('wilayah_rt.id', 'wilayah_rt.nama_rt')
     .count('muzakki.id as count')
-    .select('wilayah_rt.nama_rt', 'count')
+    .select('wilayah_rt.nama_rt')
 
   const chartAsnafDonat = await queryKeluar
     .join('mustahik_asnaf', 'zakat_keluar.mustahik_id', 'mustahik_asnaf.id')
@@ -42,7 +42,7 @@ export async function getPublikSummary(queryParams = {}, dependencies = {}) {
       total_nominal: connection.raw("CASE WHEN nominal IS NOT NULL THEN nominal ELSE 0 END"),
       total_beras: connection.raw("CASE WHEN berat_kg IS NOT NULL THEN berat_kg ELSE 0 END"),
     })
-    .select('mustahik_asnaf.kategori_asnaf', 'total_nominal', 'total_beras')
+    .select('mustahik_asnaf.kategori_asnaf')
 
   return {
     total_nominal: Number(summary?.total_nominal || 0),
