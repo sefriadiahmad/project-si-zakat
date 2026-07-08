@@ -35,6 +35,7 @@ export default function RTDetailPage() {
   const asnafChartData = useMemo(() => {
     if (!rtDetail?.mustahik?.breakdown_per_asnaf) return []
     return rtDetail.mustahik.breakdown_per_asnaf.map((item) => ({
+      // eslint-disable-next-line no-undef
       name: KATEGORI_ASNAF_LABELS[item.kategori_asnaf] || item.kategori_asnaf,
       value: item.jumlah_keluarga,
       tanggungan: item.total_tanggungan,

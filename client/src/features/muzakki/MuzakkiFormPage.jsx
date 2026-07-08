@@ -194,7 +194,7 @@ export default function MuzakkiFormPage() {
                     <SelectTrigger className="bg-slate-50/25 focus:ring-emerald-500 border-slate-200">
                       <SelectValue placeholder="Pilih wilayah RT..." />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-60 overflow-y-auto bg-white border border-slate-200 shadow-md">
                       {rtList.map((rt) => (
                         <SelectItem key={rt.id} value={rt.id.toString()}>
                           {rt.nama_rt} - {rt.keterangan || 'Tanpa Keterangan'}

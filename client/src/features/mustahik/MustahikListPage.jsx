@@ -36,6 +36,7 @@ const statusBadgeClass = {
 
 export default function MustahikListPage() {
   const { user } = useAuth()
+  // eslint-disable-next-line no-unused-vars
   const _toast = useToast()
   const isAdmin = user?.role === 'admin_masjid'
 
@@ -148,7 +149,7 @@ export default function MustahikListPage() {
               <SelectTrigger className="bg-slate-50/50 border-slate-200 w-[160px]">
                 <SelectValue placeholder="Semua Status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-60 overflow-y-auto bg-white border border-slate-200 shadow-md">
                 <SelectItem value="all">Semua Status</SelectItem>
                 {STATUS_VERIFIKASI.map((status) => (
                   <SelectItem key={status} value={status}>
@@ -168,7 +169,7 @@ export default function MustahikListPage() {
               <SelectTrigger className="bg-slate-50/50 border-slate-200 w-[160px]">
                 <SelectValue placeholder="Semua Asnaf" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-60 overflow-y-auto bg-white border border-slate-200 shadow-md">
                 <SelectItem value="all">Semua Asnaf</SelectItem>
                 {KATEGORI_ASNAF.map((asnaf) => (
                   <SelectItem key={asnaf} value={asnaf}>
@@ -188,7 +189,7 @@ export default function MustahikListPage() {
               <SelectTrigger className="bg-slate-50/50 border-slate-200 w-[160px]">
                 <SelectValue placeholder="Semua RT" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-60 overflow-y-auto bg-white border border-slate-200 shadow-md">
                 <SelectItem value="all">Semua Wilayah RT</SelectItem>
                 {rtList.map((rt) => (
                   <SelectItem key={rt.id} value={rt.id.toString()}>
@@ -237,7 +238,6 @@ export default function MustahikListPage() {
                 </Button>
               </TableHead>
               <TableHead className="font-semibold text-slate-700">Status Verifikasi</TableHead>
-              <TableHead className="w-[100px] font-semibold text-slate-700 text-right">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -278,15 +278,6 @@ export default function MustahikListPage() {
                     <Badge className={statusBadgeClass[mustahik.status_verifikasi] || 'bg-slate-100 text-slate-700 border-none'}>
                       {STATUS_VERIFIKASI_LABELS[mustahik.status_verifikasi] || mustahik.status_verifikasi}
                     </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {isAdmin && mustahik.status_verifikasi === 'menunggu' && (
-                      <Link to={`/mustahik/${mustahik.id}/verifikasi`}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
-                          <UserCheck className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                    )}
                   </TableCell>
                 </TableRow>
               ))

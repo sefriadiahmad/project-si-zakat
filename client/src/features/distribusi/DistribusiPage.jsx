@@ -200,7 +200,7 @@ export default function DistribusiPage() {
                       <SelectTrigger className="bg-white border-slate-200">
                         <SelectValue placeholder="Pilih mustahik..." />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="max-h-60 overflow-y-auto bg-white border border-slate-200 shadow-md">
                         {kuotaData?.rekomendasi?.map((item) => (
                           <SelectItem key={item.id} value={item.id.toString()}>
                             {item.nama_kepala_keluarga} - {KATEGORI_ASNAF_LABELS[item.kategori_asnaf] || item.kategori_asnaf}

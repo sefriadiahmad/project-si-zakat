@@ -159,7 +159,7 @@ export default function MuzakkiListPage() {
               <SelectTrigger className="bg-slate-50/50 border-slate-200">
                 <SelectValue placeholder="Semua RT" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-60 overflow-y-auto bg-white border border-slate-200 shadow-md">
                 <SelectItem value="all">Semua Wilayah RT</SelectItem>
                 {rtList.map((rt) => (
                   <SelectItem key={rt.id} value={rt.id.toString()}>
@@ -249,6 +249,7 @@ export default function MuzakkiListPage() {
                           checked={muzakki.is_active}
                           onCheckedChange={() => handleToggleStatus(muzakki.id, muzakki.is_active)}
                           disabled={toggleStatusMutation.isPending}
+                          className="bg-slate-100 data-[state=checked]:bg-emerald-100"
                         />
                         <span className={`text-xs font-semibold ${muzakki.is_active ? 'text-emerald-700' : 'text-slate-400'}`}>
                           {muzakki.is_active ? 'Aktif' : 'Nonaktif'}

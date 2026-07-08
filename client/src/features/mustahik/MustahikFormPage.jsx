@@ -150,7 +150,7 @@ export default function MustahikFormPage() {
                     <SelectTrigger className="bg-slate-50/25 focus:ring-emerald-500 border-slate-200">
                       <SelectValue placeholder="Pilih wilayah RT..." />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-60 overflow-y-auto bg-white border border-slate-200 shadow-md">
                       {rtList.map((rt) => (
                         <SelectItem key={rt.id} value={rt.id.toString()}>
                           {rt.nama_rt} - {rt.keterangan || 'Tanpa Keterangan'}
@@ -175,7 +175,7 @@ export default function MustahikFormPage() {
                     <SelectTrigger className="bg-slate-50/25 focus:ring-emerald-500 border-slate-200">
                       <SelectValue placeholder="Pilih kategori asnaf..." />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-60 overflow-y-auto bg-white border border-slate-200 shadow-md">
                       {KATEGORI_ASNAF.map((asnaf) => (
                         <SelectItem key={asnaf} value={asnaf}>
                           {KATEGORI_ASNAF_LABELS[asnaf]}

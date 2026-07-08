@@ -335,7 +335,7 @@ export default function FunnelFormPage() {
                   <SelectTrigger className="bg-white border-slate-200">
                     <SelectValue placeholder="Pilih metode bayar..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60 overflow-y-auto bg-white border border-slate-200 shadow-md">
                     {METODE_BAYAR.map((m) => (
                       <SelectItem key={m} value={m}>{METODE_BAYAR_LABELS[m]}</SelectItem>
                     ))}
