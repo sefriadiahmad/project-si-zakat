@@ -19,6 +19,7 @@ import dashboardRoutes from './routes/dashboard.routes.js'
 import laporanRoutes from './routes/laporan.routes.js'
 import publikRoutes from './routes/publik.routes.js'
 import demografiRoutes from './routes/demografi.routes.js'
+import userRoutes from './routes/user.routes.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -50,6 +51,7 @@ app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/laporan', laporanRoutes)
 app.use('/api/publik', publikRoutes)
 app.use('/api/demografi', demografiRoutes)
+app.use('/api/users', userRoutes)
 
 app.use(notFoundHandler)
 

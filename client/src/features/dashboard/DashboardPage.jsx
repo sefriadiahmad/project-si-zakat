@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { LogOut } from 'lucide-react'
+import { LogOut, UserPlus } from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -21,11 +21,13 @@ import { Skeleton } from '@shared/components/skeleton'
 import { ROLE_LABELS } from '@shared/constants'
 import { useAuth } from '@features/auth/AuthContext'
 import { useDashboardData, formatCurrency, formatKg, DASIENA_COLORS } from './useDashboardData'
+import UserManagementModal from '@features/admin/UserManagementModal'
 
 export default function DashboardPage() {
   const { user, logout } = useAuth()
   const [tahunHijriah, setTahunHijriah] = useState('')
   const [tahunMasehi, setTahunMasehi] = useState('')
+  const [userModalOpen, setUserModalOpen] = useState(false)
 
   const filter = useMemo(() => {
     const params = {}
@@ -56,10 +58,18 @@ export default function DashboardPage() {
             <p className="text-sm font-medium text-emerald-700">Sistem Informasi Zakat</p>
             <h1 className="text-2xl font-semibold">Dashboard</h1>
           </div>
-          <Button variant="outline" onClick={logout}>
-            <LogOut className="h-4 w-4" />
-            Keluar
-          </Button>
+          <div className="flex gap-2">
+            {user?.role === 'admin_masjid' && (
+              <Button variant="outline" onClick={() => setUserModalOpen(true)} className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                <UserPlus className="h-4 w-4" />
+                Tambah Admin
+              </Button>
+            )}
+            <Button variant="outline" onClick={logout}>
+              <LogOut className="h-4 w-4" />
+              Keluar
+            </Button>
+          </div>
         </header>
 
         <Card className="rounded-lg mb-6">
@@ -227,6 +237,9 @@ export default function DashboardPage() {
           </>
         )}
       </div>
+
+      {/* User Management Modal */}
+      <UserManagementModal open={userModalOpen} onOpenChange={setUserModalOpen} />
     </main>
   )
 }

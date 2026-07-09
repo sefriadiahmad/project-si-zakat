@@ -126,8 +126,8 @@ export default function AppLayout() {
       </nav>
 
       {/* User Profile & Logout */}
-      <div className="border-t border-slate-200 p-3">
-        <div className="mb-3 rounded-lg bg-slate-50 p-3">
+      <div className="border-t border-slate-200 p-3 space-y-2">
+        <div className="mb-2 rounded-lg bg-slate-50 p-3">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 text-sm font-semibold">
               {user?.fullName?.charAt(0)?.toUpperCase() || 'U'}
@@ -152,7 +152,7 @@ export default function AppLayout() {
         <Button
           variant="outline"
           onClick={logout}
-          className="w-full justify-center gap-2 border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+          className="w-full justify-start gap-2 border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
         >
           <LogOut className="h-4 w-4" />
           Keluar
@@ -163,7 +163,7 @@ export default function AppLayout() {
 
   return (
     <div className="flex min-h-screen bg-slate-50/50 text-slate-900">
-      {/* Desktop Sidebar (lg+) */}
+    {/* Desktop Sidebar (lg+) */}
       <aside className={`hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:${SIDEBAR_WIDTH} lg:bg-white lg:border-r lg:border-slate-200 lg:shadow-sm lg:z-30`}>
         <NavContent />
       </aside>
