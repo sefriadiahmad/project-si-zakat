@@ -21,7 +21,7 @@ import {
   Badge,
 } from '@shared/components'
 import { useToast } from '@shared/components/toaster'
-import { UserPlus, Trash2, Eye, EyeOff } from 'lucide-react'
+import { UserPlus, Trash2, Eye, EyeOff, AlertTriangle } from 'lucide-react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -38,6 +38,7 @@ const userSchema = z.object({
 export default function UserManagementModal({ open, onOpenChange }) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const [deleteTarget, setDeleteTarget] = useState(null)
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['users'],
@@ -98,6 +99,7 @@ export default function UserManagementModal({ open, onOpenChange }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
+      setDeleteTarget(null)
       toast({
         title: 'User Berhasil Dihapus',
         description: 'User berhasil dihapus dari sistem.',
@@ -198,11 +200,7 @@ export default function UserManagementModal({ open, onOpenChange }) {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => {
-                                if (window.confirm(`Hapus user "${u.username}"? Ini tidak dapat dibatalkan.`)) {
-                                  deleteMutation.mutate(u.id)
-                                }
-                              }}
+                              onClick={() => setDeleteTarget(u)}
                               disabled={deleteMutation.isPending}
                               className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                             >
@@ -227,6 +225,38 @@ export default function UserManagementModal({ open, onOpenChange }) {
           </DialogClose>
         </DialogFooter>
       </DialogContent>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent className="bg-white rounded-lg shadow-lg max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-500">
+              <AlertTriangle className="h-5 w-5" />
+              Hapus User?
+            </DialogTitle>
+            <DialogDescription>
+              Apakah Anda yakin ingin menghapus user <strong>{deleteTarget?.username}</strong>? Tindakan ini tidak dapat dibatalkan.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteTarget(null)}
+              className="border-slate-200"
+            >
+              Batal
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteMutation.mutate(deleteTarget.id)}
+              disabled={deleteMutation.isPending}
+              className="bg-red-300 hover:bg-red-400"
+            >
+              {deleteMutation.isPending ? 'Menghapus...' : 'Ya, Hapus'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   )
 }
@@ -313,7 +343,7 @@ function CreateUserForm({ onSubmit, isLoading }) {
             <select
               id="role"
               {...register('role')}
-              className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="kasir_amil">Kasir Amil</option>
               <option value="admin_masjid">Admin Masjid</option>
