@@ -34,7 +34,7 @@ router.get('/export', requireAdmin, asyncHandler(async (req, res) => {
   }
 
   const doc = await buildPdfLaporan(result.data, parsed, {
-    MASJID_NAME: 'Masjid example',
+    MASJID_NAME: 'Masjid Al-Ikhlas',
     ADMIN_NAME: 'Admin',
     ADMIN_JABATAN: 'Admin Masjid',
   })

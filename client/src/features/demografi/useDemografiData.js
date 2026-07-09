@@ -32,13 +32,6 @@ export function formatKg(value) {
   return `${(Number(value) || 0).toLocaleString('id-ID')} kg`
 }
 
-export function formatRasio(value) {
-  if (value === 'N/A' || value === null || value === undefined) {
-    return 'N/A'
-  }
-  return Number(value).toFixed(2)
-}
-
 export const ASNRAF_COLORS = {
   fakir: '#10b981',
   miskin: '#f59e0b',

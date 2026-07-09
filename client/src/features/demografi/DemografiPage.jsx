@@ -16,7 +16,7 @@ import { Input } from '@shared/components/input'
 import { Label } from '@shared/components/label'
 import { Button } from '@shared/components/button'
 import { Skeleton } from '@shared/components/skeleton'
-import { useDemografiData, formatCurrency, formatRasio } from './useDemografiData'
+import { useDemografiData, formatCurrency, } from './useDemografiData'
 
 export default function DemografiPage() {
   const [tahunHijriah, setTahunHijriah] = useState('')
@@ -357,15 +357,6 @@ export default function DemografiPage() {
                         <SortIcon field="total_dana_keluar" />
                       </button>
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase text-slate-600 tracking-wider">
-                      <button
-                        className="flex items-center gap-1 mx-auto hover:text-slate-900"
-                        onClick={() => handleSort('rasio_muzakki_mustahik')}
-                      >
-                        Rasio Muz/Must
-                        <SortIcon field="rasio_muzakki_mustahik" />
-                      </button>
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -414,17 +405,6 @@ export default function DemografiPage() {
                         </td>
                         <td className="px-4 py-3 text-right font-medium text-slate-900">
                           {formatCurrency(rt.total_dana_keluar)}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <span
-                            className={`text-sm font-semibold ${
-                              rt.rasio_muzakki_mustahik === 'N/A'
-                                ? 'text-slate-400'
-                                : 'text-slate-700'
-                            }`}
-                          >
-                            {formatRasio(rt.rasio_muzakki_mustahik)}
-                          </span>
                         </td>
                       </tr>
                     ))
