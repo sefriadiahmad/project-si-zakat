@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/static-components */
 import { useState, useMemo } from 'react'
-import { ArrowUpDown, MapPin, Users, UserCheck, TrendingUp, TrendingDown } from 'lucide-react'
+import { ArrowUpDown, MapPin, Users, UserCheck, TrendingUp, TrendingDown, Package } from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -16,7 +16,7 @@ import { Input } from '@shared/components/input'
 import { Label } from '@shared/components/label'
 import { Button } from '@shared/components/button'
 import { Skeleton } from '@shared/components/skeleton'
-import { useDemografiData, formatCurrency, } from './useDemografiData'
+import { useDemografiData, formatCurrency, formatKg } from './useDemografiData'
 
 export default function DemografiPage() {
   const [tahunHijriah, setTahunHijriah] = useState('')
@@ -66,7 +66,9 @@ export default function DemografiPage() {
         totalMuzakki: 0,
         totalMustahik: 0,
         totalDanaMasuk: 0,
+        totalBerasMasuk: 0,
         totalDanaKeluar: 0,
+        totalBerasKeluar: 0,
       }
     }
 
@@ -75,9 +77,11 @@ export default function DemografiPage() {
         totalMuzakki: acc.totalMuzakki + rt.jumlah_muzakki_aktif,
         totalMustahik: acc.totalMustahik + rt.jumlah_mustahik_terverifikasi,
         totalDanaMasuk: acc.totalDanaMasuk + rt.total_dana_masuk,
+        totalBerasMasuk: acc.totalBerasMasuk + rt.total_beras_masuk,
         totalDanaKeluar: acc.totalDanaKeluar + rt.total_dana_keluar,
+        totalBerasKeluar: acc.totalBerasKeluar + rt.total_beras_keluar,
       }),
-      { totalMuzakki: 0, totalMustahik: 0, totalDanaMasuk: 0, totalDanaKeluar: 0 }
+      { totalMuzakki: 0, totalMustahik: 0, totalDanaMasuk: 0, totalBerasMasuk: 0, totalDanaKeluar: 0, totalBerasKeluar: 0 }
     )
   }, [demografiData])
 
@@ -179,74 +183,120 @@ export default function DemografiPage() {
 
         {/* Summary Cards */}
         {isLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {[1, 2, 3, 4].map((i) => (
-              <Card key={i} className="rounded-xl border border-slate-200/80 shadow-sm">
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 mb-4">
+              {[1, 2].map((i) => (
+                <Card key={`top-${i}`} className="rounded-xl border border-slate-200/80 shadow-sm">
+                  <CardContent className="p-6">
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-8 w-16" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              {[1, 2, 3, 4].map((i) => (
+                <Card key={`bottom-${i}`} className="rounded-xl border border-slate-200/80 shadow-sm">
+                  <CardContent className="p-6">
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-8 w-16" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Row 1: Muzakki & Mustahik */}
+            <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 mb-4">
+              <Card className="rounded-xl border border-slate-200/80 shadow-sm">
                 <CardContent className="p-6">
-                  <Skeleton className="h-4 w-24 mb-2" />
-                  <Skeleton className="h-8 w-16" />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600">Total Muzakki Aktif</p>
+                      <p className="text-2xl font-bold text-slate-900 mt-1">
+                        {totals.totalMuzakki.toLocaleString('id-ID')}
+                      </p>
+                    </div>
+                    <Users className="h-10 w-10 text-emerald-500" />
+                  </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Muzakki Aktif</p>
-                    <p className="text-2xl font-bold text-slate-900 mt-1">
-                      {totals.totalMuzakki.toLocaleString('id-ID')}
-                    </p>
-                  </div>
-                  <Users className="h-10 w-10 text-emerald-500" />
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Mustahik Terverifikasi</p>
-                    <p className="text-2xl font-bold text-slate-900 mt-1">
-                      {totals.totalMustahik.toLocaleString('id-ID')}
-                    </p>
+              <Card className="rounded-xl border border-slate-200/80 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600">Total Mustahik Terverifikasi</p>
+                      <p className="text-2xl font-bold text-slate-900 mt-1">
+                        {totals.totalMustahik.toLocaleString('id-ID')}
+                      </p>
+                    </div>
+                    <UserCheck className="h-10 w-10 text-blue-500" />
                   </div>
-                  <UserCheck className="h-10 w-10 text-blue-500" />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
 
-            <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Dana Masuk</p>
-                    <p className="text-lg font-bold text-slate-900 mt-1">
-                      {formatCurrency(totals.totalDanaMasuk)}
-                    </p>
+            {/* Row 2: Dana & Beras */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <Card className="rounded-xl border border-emerald-200/80 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600">Total Dana Masuk</p>
+                      <p className="text-lg font-bold text-slate-900 mt-1">
+                        {formatCurrency(totals.totalDanaMasuk)}
+                      </p>
+                    </div>
+                    <TrendingUp className="h-10 w-10 text-emerald-500" />
                   </div>
-                  <TrendingUp className="h-10 w-10 text-emerald-500" />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Dana Keluar</p>
-                    <p className="text-lg font-bold text-slate-900 mt-1">
-                      {formatCurrency(totals.totalDanaKeluar)}
-                    </p>
+              <Card className="rounded-xl border border-red-200/80 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600">Total Dana Keluar</p>
+                      <p className="text-lg font-bold text-slate-900 mt-1">
+                        {formatCurrency(totals.totalDanaKeluar)}
+                      </p>
+                    </div>
+                    <TrendingDown className="h-10 w-10 text-emerald-500" />
                   </div>
-                  <TrendingDown className="h-10 w-10 text-red-500" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-xl border border-emerald-200/80 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600">Beras Masuk</p>
+                      <p className="text-lg font-bold mt-1">
+                        {formatKg(totals.totalBerasMasuk)}
+                      </p>
+                    </div>
+                    <Package className="h-10 w-10 text-emerald-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-xl border border-red-200/80 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-600">Beras Keluar</p>
+                      <p className="text-lg font-bold mt-1">
+                        {formatKg(totals.totalBerasKeluar)}
+                      </p>
+                    </div>
+                    <Package className="h-10 w-10 text-red-500" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </>
         )}
 
         {/* Error State */}
@@ -357,6 +407,24 @@ export default function DemografiPage() {
                         <SortIcon field="total_dana_keluar" />
                       </button>
                     </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-600 tracking-wider">
+                      <button
+                        className="flex items-center gap-1 ml-auto hover:text-slate-900"
+                        onClick={() => handleSort('total_beras_masuk')}
+                      >
+                        Beras Masuk
+                        <SortIcon field="total_beras_masuk" />
+                      </button>
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-600 tracking-wider">
+                      <button
+                        className="flex items-center gap-1 ml-auto hover:text-slate-900"
+                        onClick={() => handleSort('total_beras_keluar')}
+                      >
+                        Beras Keluar
+                        <SortIcon field="total_beras_keluar" />
+                      </button>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -368,8 +436,8 @@ export default function DemografiPage() {
                         <td className="px-4 py-3 text-center"><Skeleton className="h-4 w-8 mx-auto" /></td>
                         <td className="px-4 py-3 text-right"><Skeleton className="h-4 w-24 ml-auto" /></td>
                         <td className="px-4 py-3 text-right"><Skeleton className="h-4 w-24 ml-auto" /></td>
-                        <td className="px-4 py-3 text-center"><Skeleton className="h-4 w-12 mx-auto" /></td>
-                        <td className="px-4 py-3 text-center"><Skeleton className="h-4 w-8 mx-auto" /></td>
+                        <td className="px-4 py-3 text-right"><Skeleton className="h-4 w-20 ml-auto" /></td>
+                        <td className="px-4 py-3 text-right"><Skeleton className="h-4 w-20 ml-auto" /></td>
                       </tr>
                     ))
                   ) : sortedData.length === 0 ? (
@@ -400,11 +468,17 @@ export default function DemografiPage() {
                             {rt.jumlah_mustahik_terverifikasi}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-right font-medium text-slate-900">
+                        <td className="px-4 py-3 text-right font-medium text-emerald-700">
                           {formatCurrency(rt.total_dana_masuk)}
                         </td>
-                        <td className="px-4 py-3 text-right font-medium text-slate-900">
+                        <td className="px-4 py-3 text-right font-medium text-red-700">
                           {formatCurrency(rt.total_dana_keluar)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-medium text-emerald-700">
+                          {formatKg(rt.total_beras_masuk)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-medium text-red-700">
+                          {formatKg(rt.total_beras_keluar)}
                         </td>
                       </tr>
                     ))
