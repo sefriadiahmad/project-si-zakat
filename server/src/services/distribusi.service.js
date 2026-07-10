@@ -65,17 +65,58 @@ export async function getDistribusiKuota(queryParams = {}, dependencies = {}) {
   const connection = dependencies.db || db
   const { tahun_hijriah, tahun_masehi } = queryParams
 
+  // Get kuota (masuk data)
   const kuota = await hitungKuota(tahun_hijriah, tahun_masehi, { db: connection })
 
-  const mustahikList = await connection('mustahik_asnaf')
-    .where('status_verifikasi', 'terverifikasi')
-    .select('id', 'nama_kepala_keluarga', 'kategori_asnaf', 'jumlah_tanggungan', 'wilayah_rt_id')
+  // Get keluar totals - sum of nominal and berat_kg from zakat_keluar
+  let keluarQuery = connection('zakat_keluar')
 
-  const rekomendasi = await rekomendasiPerMustahik(mustahikList, kuota, { db: connection })
+  if (tahun_hijriah) {
+    keluarQuery = keluarQuery.where('tahun_hijriah', parseInt(tahun_hijriah, 10))
+  }
+  if (tahun_masehi) {
+    keluarQuery = keluarQuery.where('tahun_masehi', parseInt(tahun_masehi, 10))
+  }
+
+  const keluar = await keluarQuery
+    .sum({
+      total_dana_keluar: 'nominal',
+      total_beras_keluar: 'berat_kg',
+    })
+    .first()
+
+  // Get distribusi asnaf - join zakat_keluar with mustahik_asnaf to get kategori_asnaf
+  let distribusiQuery = connection('zakat_keluar')
+    .join('mustahik_asnaf', 'zakat_keluar.mustahik_id', 'mustahik_asnaf.id')
+
+  if (tahun_hijriah) {
+    distribusiQuery = distribusiQuery.where('zakat_keluar.tahun_hijriah', parseInt(tahun_hijriah, 10))
+  }
+  if (tahun_masehi) {
+    distribusiQuery = distribusiQuery.where('zakat_keluar.tahun_masehi', parseInt(tahun_masehi, 10))
+  }
+
+  const distribusiAsnaf = await distribusiQuery
+    .groupBy('mustahik_asnaf.kategori_asnaf')
+    .sum({
+      total_nominal: 'zakat_keluar.nominal',
+      total_beras: 'zakat_keluar.berat_kg',
+    })
+    .select('mustahik_asnaf.kategori_asnaf')
+
+  // Get mustahik count by kategori asnaf (verified only)
+  const mustahikByAsnaf = await connection('mustahik_asnaf')
+    .where('status_verifikasi', 'terverifikasi')
+    .groupBy('kategori_asnaf')
+    .count('id as total')
+    .select('kategori_asnaf')
 
   return {
     ...kuota,
-    rekomendasi,
+    total_dana_keluar: Number(keluar?.total_dana_keluar || 0),
+    total_beras_keluar: Number(keluar?.total_beras_keluar || 0),
+    distribusi_asnaf: distribusiAsnaf || [],
+    mustahik_by_asnaf: mustahikByAsnaf || [],
   }
 }
 

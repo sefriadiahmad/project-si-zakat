@@ -22,6 +22,8 @@ import { ROLE_LABELS } from '@shared/constants'
 import { useAuth } from '@features/auth/AuthContext'
 import { useDashboardData, formatCurrency, formatKg, DASIENA_COLORS } from './useDashboardData'
 import UserManagementModal from '@features/admin/UserManagementModal'
+import api from '@shared/lib/api'
+import { useQuery } from '@tanstack/react-query'
 
 export default function DashboardPage() {
   const { user, logout } = useAuth()
@@ -38,21 +40,82 @@ export default function DashboardPage() {
 
   const { data, isLoading, isError, error } = useDashboardData(filter)
 
+  // Fetch distribusi data
+  const { data: distribusiData } = useQuery({
+    queryKey: ['dashboard-distribusi', filter],
+    queryFn: async () => {
+      const response = await api.get('/distribusi/kuota', { params: filter })
+      return response.data
+    },
+    staleTime: 10000,
+  })
+
   const isTimeoutError = error?.message === 'Request timeout' || error?.message === 'Network Error'
 
+  // KPI Cards
   const kpiCards = useMemo(() => {
     if (!data) return []
     return [
-      { title: 'Total Dana Terkumpul', value: formatCurrency(data.total_nominal), icon: '💰' },
-      { title: 'Total Beras Terkumpul', value: formatKg(data.total_beras), icon: '🌾' },
-      { title: 'Total Muzakki Aktif', value: data.total_muzakki_aktif.toLocaleString('id-ID'), icon: '👥' },
-      { title: 'Total Mustahik Terverifikasi', value: data.total_mustahik_terverifikasi.toLocaleString('id-ID'), icon: '✅' },
+      { title: 'Total Dana Masuk', value: formatCurrency(data.total_nominal), icon: '💰', color: 'text-emerald-600' },
+      { title: 'Total Dana Keluar', value: formatCurrency(distribusiData?.total_dana_keluar || 0), icon: '💸', color: 'text-red-600' },
+      { title: 'Total Beras Masuk', value: formatKg(data.total_beras), icon: '🌾', color: 'text-amber-600' },
+      { title: 'Total Beras Keluar', value: formatKg(distribusiData?.total_beras_keluar || 0), icon: '🍚', color: 'text-orange-600' },
     ]
-  }, [data])
+  }, [data, distribusiData])
+
+  // Perbandingan Dana data
+  const perbandinganDanaData = useMemo(() => [
+    { name: 'Dana Masuk', value: data?.total_nominal || 0 },
+    { name: 'Dana Keluar', value: distribusiData?.total_dana_keluar || 0 },
+  ], [data, distribusiData])
+
+  // Perbandingan Beras data
+  const perbandinganBerasData = useMemo(() => [
+    { name: 'Beras Masuk', value: data?.total_beras || 0 },
+    { name: 'Beras Keluar', value: distribusiData?.total_beras_keluar || 0 },
+  ], [data, distribusiData])
+
+  // Asnaf Uang chart data
+  const asnafUangData = useMemo(() => {
+    if (!distribusiData?.distribusi_asnaf) return []
+    return distribusiData.distribusi_asnaf.map(item => ({
+      kategori_asnaf: item.kategori_asnaf,
+      total_nominal: Number(item.total_nominal) || 0,
+    }))
+  }, [distribusiData])
+
+  // Asnaf Beras chart data
+  const asnafBerasData = useMemo(() => {
+    if (!distribusiData?.distribusi_asnaf) return []
+    return distribusiData.distribusi_asnaf.map(item => ({
+      kategori_asnaf: item.kategori_asnaf,
+      total_beras: Number(item.total_beras) || 0,
+    }))
+  }, [distribusiData])
+
+  // Mustahik per Asnaf chart data
+  const mustahikByAsnafData = useMemo(() => {
+    if (!distribusiData?.mustahik_by_asnaf) return []
+    return distribusiData.mustahik_by_asnaf.map(item => ({
+      kategori_asnaf: item.kategori_asnaf,
+      count: Number(item.total) || 0,
+    }))
+  }, [distribusiData])
+
+  const labelMap = {
+    fakir: 'Fakir',
+    miskin: 'Miskin',
+    amil: 'Amil',
+    mualaf: 'Mualaf',
+    riqab: 'Riqab',
+    gharim: 'Gharim',
+    fisabilillah: 'Fisabilillah',
+    ibnu_sabil: 'Ibnu Sabil',
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 p-4 text-slate-950 sm:p-6">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-medium text-emerald-700">Sistem Informasi Zakat</p>
@@ -111,7 +174,7 @@ export default function DashboardPage() {
 
         {isLoading && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-            {kpiCards.map((card, idx) => (
+            {kpiCards.map((_, idx) => (
               <Card key={idx} className="rounded-xl border border-slate-200/80 shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -149,6 +212,7 @@ export default function DashboardPage() {
 
         {!isLoading && !isError && (
           <>
+            {/* KPI Cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
               {kpiCards.map((card, idx) => (
                 <Card key={idx} className="rounded-xl border border-slate-200/80 shadow-sm">
@@ -158,30 +222,34 @@ export default function DashboardPage() {
                         <p className="text-sm font-medium text-slate-600">{card.title}</p>
                         <p className="text-2xl font-bold text-slate-900 mt-1">{card.value}</p>
                       </div>
-                      <span className="text-2xl">{card.icon}</span>
+                      <span className={`text-2xl ${card.color}`}>{card.icon}</span>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* Row 1: Perbandingan Dana & Beras */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
               <Card className="rounded-xl border border-slate-200/80 shadow-sm">
                 <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-                  <CardTitle className="text-lg font-bold text-slate-900">Muzakki per Wilayah RT</CardTitle>
+                  <CardTitle className="text-lg font-bold text-slate-900">Perbandingan Dana</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <div className="h-80">
+                  <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={data?.chart_muzakki_rt || []}>
+                      <BarChart data={perbandinganDanaData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey="nama_rt" tick={{ fontSize: 12 }} stroke="#64748b" />
+                        <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="#64748b" />
                         <YAxis tick={{ fontSize: 12 }} stroke="#64748b" />
                         <Tooltip
                           contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                          formatter={(value) => [value, 'Jumlah Muzakki']}
+                          formatter={(value) => [formatCurrency(value), 'Jumlah']}
                         />
-                        <Bar dataKey="count" name="Jumlah Muzakki" fill="#10b981" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="value" name="Dana" radius={[4, 4, 0, 0]}>
+                          <Cell fill="#10b981" />
+                          <Cell fill="#ef4444" />
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -190,42 +258,139 @@ export default function DashboardPage() {
 
               <Card className="rounded-xl border border-slate-200/80 shadow-sm">
                 <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-                  <CardTitle className="text-lg font-bold text-slate-900">Proporsi Distribusi per Asnaf</CardTitle>
+                  <CardTitle className="text-lg font-bold text-slate-900">Perbandingan Beras</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <div className="h-80">
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={perbandinganBerasData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="#64748b" />
+                        <YAxis tick={{ fontSize: 12 }} stroke="#64748b" />
+                        <Tooltip
+                          contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                          formatter={(value) => [formatKg(value), 'Jumlah']}
+                        />
+                        <Bar dataKey="value" name="Beras" radius={[4, 4, 0, 0]}>
+                          <Cell fill="#f59e0b" />
+                          <Cell fill="#ea580c" />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Row 2: Muzakki per RT & Mustahik per Asnaf */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
+              <Card className="rounded-xl border border-slate-200/80 shadow-sm">
+                <CardHeader className="bg-slate-50/50 border-b border-b border-slate-100">
+                  <CardTitle className="text-lg font-bold text-slate-900">Muzakki per RT</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={data?.chart_muzakki_rt || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="nama_rt" tick={{ fontSize: 10 }} stroke="#64748b" />
+                        <YAxis tick={{ fontSize: 10 }} stroke="#64748b" />
+                        <Tooltip
+                          contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                          formatter={(value) => [value, 'Jumlah']}
+                        />
+                        <Bar dataKey="count" fill="#10b981" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-xl border border-slate-200/80 shadow-sm">
+                <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+                  <CardTitle className="text-lg font-bold text-slate-900">Mustahik per Asnaf</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={mustahikByAsnafData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="kategori_asnaf" tick={{ fontSize: 10 }} stroke="#64748b" />
+                        <YAxis tick={{ fontSize: 10 }} stroke="#64748b" />
+                        <Tooltip
+                          contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                          formatter={(value) => [value, 'Jumlah']}
+                        />
+                        <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Row 3: Asnaf Uang & Asnaf Beras */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
+              <Card className="rounded-xl border border-slate-200/80 shadow-sm">
+                <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+                  <CardTitle className="text-lg font-bold text-slate-900">Distribusi Asnaf (Uang)</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={data?.chart_asnaf_donat || []}
+                          data={asnafUangData}
                           cx="50%"
                           cy="50%"
                           labelLine={true}
-                          label={({ kategori_asnaf, percent }) => {
-                            const labelMap = {
-                              fakir: 'Fakir',
-                              miskin: 'Miskin',
-                              amil: 'Amil',
-                              mualaf: 'Mualaf',
-                              riqab: 'Riqab',
-                              gharim: 'Gharim',
-                              fisabilillah: 'Fisabilillah',
-                              ibnu_sabil: 'Ibnu Sabil',
-                            }
-                            return `${labelMap[kategori_asnaf] || kategori_asnaf}: ${(percent * 100).toFixed(0)}%`
-                          }}
-                          outerRadius={100}
+                          label={({ kategori_asnaf, percent }) => `${labelMap[kategori_asnaf] || kategori_asnaf}: ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={90}
                           fill="#8884d8"
                           dataKey="total_nominal"
                           nameKey="kategori_asnaf"
                         >
-                          {(data?.chart_asnaf_donat || []).map((entry, index) => (
+                          {asnafUangData.map((_, index) => (
                             <Cell key={`cell-${index}`} fill={DASIENA_COLORS[index % DASIENA_COLORS.length]} />
                           ))}
                         </Pie>
                         <Tooltip
                           contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                          formatter={(value) => [formatCurrency(value), 'Total Distribusi']}
+                          formatter={(value) => [formatCurrency(value), 'Total']}
+                        />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-xl border border-slate-200/80 shadow-sm">
+                <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+                  <CardTitle className="text-lg font-bold text-slate-900">Distribusi Asnaf (Beras)</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={asnafBerasData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={true}
+                          label={({ kategori_asnaf, percent }) => `${labelMap[kategori_asnaf] || kategori_asnaf}: ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={90}
+                          fill="#8884d8"
+                          dataKey="total_beras"
+                          nameKey="kategori_asnaf"
+                        >
+                          {asnafBerasData.map((_, index) => (
+                            <Cell key={`cell-${index}`} fill={DASIENA_COLORS[index % DASIENA_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                          formatter={(value) => [formatKg(value), 'Total']}
                         />
                         <Legend />
                       </PieChart>
@@ -236,10 +401,10 @@ export default function DashboardPage() {
             </div>
           </>
         )}
-      </div>
 
-      {/* User Management Modal */}
-      <UserManagementModal open={userModalOpen} onOpenChange={setUserModalOpen} />
+        {/* User Management Modal */}
+        <UserManagementModal open={userModalOpen} onOpenChange={setUserModalOpen} />
+      </div>
     </main>
   )
 }
