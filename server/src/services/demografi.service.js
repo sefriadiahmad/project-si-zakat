@@ -48,6 +48,31 @@ export async function getDemografiSummary(queryParams = {}, dependencies = {}) {
     muzakkiCounts.map((m) => [m.wilayah_rt_id, Number(m.jumlah_muzakki)])
   )
 
+  // Get mustahik category breakdown per RT (verified only)
+  const mustahikByAsnafQuery = connection('mustahik_asnaf')
+    .where('status_verifikasi', 'terverifikasi')
+    .select('wilayah_rt_id', 'kategori_asnaf')
+    .count('id as jumlah_keluarga')
+    .sum('jumlah_tanggungan as total_tanggungan')
+    .groupBy('wilayah_rt_id', 'kategori_asnaf')
+
+  const mustahikByAsnafData = await mustahikByAsnafQuery
+
+  // Create nested map: rtId -> { kategori_asnaf -> { jumlah, tanggungan } }
+  const mustahikAsnafMap = new Map()
+  mustahikByAsnafData.forEach((m) => {
+    if (!mustahikAsnafMap.has(m.wilayah_rt_id)) {
+      mustahikAsnafMap.set(m.wilayah_rt_id, new Map())
+    }
+    mustahikAsnafMap.get(m.wilayah_rt_id).set(m.kategori_asnaf, {
+      jumlah_keluarga: Number(m.jumlah_keluarga),
+      total_tanggungan: Number(m.total_tanggungan || 0),
+    })
+  })
+
+  // Get all unique asnaf categories for chart reference
+  const allAsnafCategories = [...new Set(mustahikByAsnafData.map((m) => m.kategori_asnaf))]
+
   // Get mustahik counts per RT (verified only)
   const mustahikCounts = await connection('mustahik_asnaf')
     .where('status_verifikasi', 'terverifikasi')
@@ -117,6 +142,14 @@ export async function getDemografiSummary(queryParams = {}, dependencies = {}) {
     const mustahikData = mustahikMap.get(rt.id) || { jumlah_mustahik: 0, total_tanggungan: 0 }
     const zakatMasuk = zakatMasukMap.get(rt.id) || { total_dana_masuk: 0, total_beras_masuk: 0 }
     const zakatKeluar = zakatKeluarMap.get(rt.id) || { total_dana_keluar: 0, total_beras_keluar: 0 }
+    const asnafData = mustahikAsnafMap.get(rt.id) || new Map()
+
+    // Convert asnaf map to array for JSON
+    const mustahik_per_asnaf = Array.from(asnafData.entries()).map(([kategori, data]) => ({
+      kategori_asnaf: kategori,
+      jumlah_keluarga: data.jumlah_keluarga,
+      total_tanggungan: data.total_tanggungan,
+    }))
 
     // Calculate ratio: muzakki/mustahik, return "N/A" if mustahik is 0
     const rasio = mustahikData.jumlah_mustahik > 0
@@ -135,10 +168,11 @@ export async function getDemografiSummary(queryParams = {}, dependencies = {}) {
       total_dana_keluar: zakatKeluar.total_dana_keluar,
       total_beras_keluar: zakatKeluar.total_beras_keluar,
       rasio_muzakki_mustahik: rasio,
+      mustahik_per_asnaf: mustahik_per_asnaf,
     }
   })
 
-  return result
+  return { wilayah: result, asnaf_categories: allAsnafCategories }
 }
 
 /**

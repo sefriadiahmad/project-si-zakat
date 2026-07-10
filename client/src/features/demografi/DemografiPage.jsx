@@ -16,6 +16,7 @@ import { Input } from '@shared/components/input'
 import { Label } from '@shared/components/label'
 import { Button } from '@shared/components/button'
 import { Skeleton } from '@shared/components/skeleton'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components/select'
 import { useDemografiData, formatCurrency, formatKg } from './useDemografiData'
 
 export default function DemografiPage() {
@@ -23,6 +24,7 @@ export default function DemografiPage() {
   const [tahunMasehi, setTahunMasehi] = useState('')
   const [sortField, setSortField] = useState('nama_rt')
   const [sortDirection, setSortDirection] = useState('asc')
+  const [selectedRT, setSelectedRT] = useState('all')
 
   const filter = useMemo(() => {
     const params = {}
@@ -33,11 +35,19 @@ export default function DemografiPage() {
 
   const { data: demografiData, isLoading, isError } = useDemografiData(filter)
 
+  // Normalize data - handle both array and object response formats
+  const wilayahData = useMemo(() => {
+    if (!demografiData) return []
+    // Backend returns { wilayah: [...], asnaf_categories: [...] } or just [...]
+    if (Array.isArray(demografiData)) return demografiData
+    return demografiData.wilayah || []
+  }, [demografiData])
+
   // Sort data
   const sortedData = useMemo(() => {
-    if (!demografiData) return []
+    if (!wilayahData || wilayahData.length === 0) return []
 
-    return [...demografiData].sort((a, b) => {
+    return [...wilayahData].sort((a, b) => {
       let aVal = a[sortField]
       let bVal = b[sortField]
 
@@ -57,11 +67,11 @@ export default function DemografiPage() {
       }
       return aVal < bVal ? 1 : -1
     })
-  }, [demografiData, sortField, sortDirection])
+  }, [wilayahData, sortField, sortDirection])
 
   // Calculate totals for summary
   const totals = useMemo(() => {
-    if (!demografiData || demografiData.length === 0) {
+    if (!wilayahData || wilayahData.length === 0) {
       return {
         totalMuzakki: 0,
         totalMustahik: 0,
@@ -72,7 +82,7 @@ export default function DemografiPage() {
       }
     }
 
-    return demografiData.reduce(
+    return wilayahData.reduce(
       (acc, rt) => ({
         totalMuzakki: acc.totalMuzakki + rt.jumlah_muzakki_aktif,
         totalMustahik: acc.totalMustahik + rt.jumlah_mustahik_terverifikasi,
@@ -83,7 +93,7 @@ export default function DemografiPage() {
       }),
       { totalMuzakki: 0, totalMustahik: 0, totalDanaMasuk: 0, totalBerasMasuk: 0, totalDanaKeluar: 0, totalBerasKeluar: 0 }
     )
-  }, [demografiData])
+  }, [wilayahData])
 
   // Chart data for muzakki per RT
   const muzakkiChartData = useMemo(() => {
@@ -94,6 +104,44 @@ export default function DemografiPage() {
       mustahik: rt.jumlah_mustahik_terverifikasi,
     }))
   }, [sortedData])
+
+  // Get list of RTs for dropdown
+  const rtList = useMemo(() => {
+    if (!wilayahData) return []
+    return wilayahData.map((rt) => ({ rt_id: rt.rt_id, nama_rt: rt.nama_rt }))
+  }, [wilayahData])
+
+  // Chart data for mustahik categories - all RTs aggregated or single RT
+  const mustahikCategoryChartData = useMemo(() => {
+    if (!wilayahData || wilayahData.length === 0) return []
+
+    // Get the RTs to include based on selected filter
+    const selectedRTs = selectedRT === 'all'
+      ? wilayahData
+      : wilayahData.filter((rt) => rt.rt_id === parseInt(selectedRT, 10) || rt.nama_rt === selectedRT)
+
+    if (selectedRTs.length === 0) return []
+
+    // Aggregate mustahik per asnaf category across selected RTs
+    const asnafTotals = {}
+    selectedRTs.forEach((rt) => {
+      if (rt.mustahik_per_asnaf) {
+        rt.mustahik_per_asnaf.forEach((asnaf) => {
+          if (!asnafTotals[asnaf.kategori_asnaf]) {
+            asnafTotals[asnaf.kategori_asnaf] = 0
+          }
+          asnafTotals[asnaf.kategori_asnaf] += asnaf.jumlah_keluarga
+        })
+      }
+    })
+
+    return Object.entries(asnafTotals)
+      .map(([kategori, jumlah]) => ({
+        kategori: kategori.charAt(0).toUpperCase() + kategori.slice(1).replace(/_/g, ' '),
+        jumlah,
+      }))
+      .sort((a, b) => b.jumlah - a.jumlah)
+  }, [wilayahData, selectedRT])
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -337,7 +385,7 @@ export default function DemografiPage() {
                       <YAxis tick={{ fontSize: 12 }} stroke="#64748b" />
                       <Tooltip
                         contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                        formatter={(value, name) => [value, name === 'muzakki' ? 'Muzakki' : 'Mustahik']}
+                        formatter={(value, name) => [value, name]}
                       />
                       <Legend />
                       <Bar dataKey="muzakki" name="Muzakki" fill="#10b981" radius={[4, 4, 0, 0]} />
@@ -345,6 +393,59 @@ export default function DemografiPage() {
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Bar Chart - Mustahik Categories per RT */}
+            <Card className="rounded-xl border border-slate-200/80 shadow-sm">
+              <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <CardTitle className="text-lg font-bold text-slate-900">
+                    Kategori Mustahik per RT
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="rtSelect" className="text-sm text-slate-600">Pilih RT:</Label>
+                    <Select value={selectedRT} onValueChange={setSelectedRT}>
+                      <SelectTrigger id="rtSelect" className="w-40 h-9">
+                        <SelectValue placeholder="Semua RT" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-md">
+                        <SelectItem value="all">Semua RT</SelectItem>
+                        {rtList.map((rt) => (
+                          <SelectItem key={rt.rt_id} value={String(rt.rt_id)}>
+                            {rt.nama_rt}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-4">
+                {mustahikCategoryChartData.length > 0 ? (
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={mustahikCategoryChartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis
+                          dataKey="kategori"
+                          tick={{ fontSize: 11 }}
+                          stroke="#64748b"
+                        />
+                        <YAxis tick={{ fontSize: 12 }} stroke="#64748b" />
+                        <Tooltip
+                          contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                          formatter={(value) => [`${value} keluarga`, 'Jumlah']}
+                        />
+                        <Bar dataKey="jumlah" name="Jumlah Keluarga" fill="#10b981" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-40 flex items-center justify-center text-slate-500">
+                    <p className="text-sm">Tidak ada data mustahik terverifikasi</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
