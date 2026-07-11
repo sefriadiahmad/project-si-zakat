@@ -152,7 +152,7 @@ export default function AppLayout() {
         <Button
           variant="outline"
           onClick={logout}
-          className="w-full justify-start gap-2 border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+          className="w-full justify-center gap-2 border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
         >
           <LogOut className="h-4 w-4" />
           Keluar
@@ -193,13 +193,6 @@ export default function AppLayout() {
         >
           <Menu className="h-5 w-5" />
         </Button>
-
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-sm font-bold text-white">
-            <Activity className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-sm font-semibold text-slate-900">Sistem Informasi Zakat</span>
-        </Link>
 
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 text-sm font-semibold">
           {user?.fullName?.charAt(0)?.toUpperCase() || 'U'}
