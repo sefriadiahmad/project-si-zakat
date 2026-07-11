@@ -111,12 +111,27 @@ export async function getDistribusiKuota(queryParams = {}, dependencies = {}) {
     .count('id as total')
     .select('kategori_asnaf')
 
+  // Get verified mustahik list for recommendations
+  const mustahikList = await connection('mustahik_asnaf')
+    .where('status_verifikasi', 'terverifikasi')
+    .select(
+      'id',
+      'nama_kepala_keluarga',
+      'kategori_asnaf',
+      'jumlah_tanggungan'
+    )
+    .orderBy('nama_kepala_keluarga', 'asc')
+
+  // Calculate recommendations per mustahik
+  const rekomendasi = await rekomendasiPerMustahik(mustahikList, kuota, { db: connection })
+
   return {
     ...kuota,
     total_dana_keluar: Number(keluar?.total_dana_keluar || 0),
     total_beras_keluar: Number(keluar?.total_beras_keluar || 0),
     distribusi_asnaf: distribusiAsnaf || [],
     mustahik_by_asnaf: mustahikByAsnaf || [],
+    rekomendasi,
   }
 }
 

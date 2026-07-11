@@ -33,7 +33,40 @@ export async function getPublikSummary(queryParams = {}, dependencies = {}) {
     .where('muzakki.is_active', true)
     .groupBy('wilayah_rt.id', 'wilayah_rt.nama_rt')
     .count('muzakki.id as count')
-    .select('wilayah_rt.nama_rt')
+    .select('wilayah_rt.id as wilayah_rt_id', 'wilayah_rt.nama_rt')
+
+  const chartMustahikRt = await connection('mustahik_asnaf')
+    .join('wilayah_rt', 'mustahik_asnaf.wilayah_rt_id', 'wilayah_rt.id')
+    .where('mustahik_asnaf.status_verifikasi', 'terverifikasi')
+    .groupBy('wilayah_rt.id', 'wilayah_rt.nama_rt')
+    .count('mustahik_asnaf.id as count')
+    .select('wilayah_rt.id as wilayah_rt_id', 'wilayah_rt.nama_rt')
+
+  // Combine muzakki and mustahik data per RT
+  const wilayahMap = new Map()
+  chartMuzakkiRt.forEach((row) => {
+    wilayahMap.set(row.wilayah_rt_id, {
+      wilayah_rt_id: row.wilayah_rt_id,
+      nama_rt: row.nama_rt,
+      muzakki: Number(row.count),
+      mustahik: 0,
+    })
+  })
+  chartMustahikRt.forEach((row) => {
+    if (wilayahMap.has(row.wilayah_rt_id)) {
+      wilayahMap.get(row.wilayah_rt_id).mustahik = Number(row.count)
+    } else {
+      wilayahMap.set(row.wilayah_rt_id, {
+        wilayah_rt_id: row.wilayah_rt_id,
+        nama_rt: row.nama_rt,
+        muzakki: 0,
+        mustahik: Number(row.count),
+      })
+    }
+  })
+  const chartPerbandinganRT = Array.from(wilayahMap.values()).sort((a, b) =>
+    a.nama_rt.localeCompare(b.nama_rt, undefined, { numeric: true })
+  )
 
   const chartAsnafDonat = await queryKeluar
     .join('mustahik_asnaf', 'zakat_keluar.mustahik_id', 'mustahik_asnaf.id')
@@ -47,15 +80,15 @@ export async function getPublikSummary(queryParams = {}, dependencies = {}) {
   return {
     total_nominal: Number(summary?.total_nominal || 0),
     total_beras: Number(summary?.total_beras || 0),
-    chart_muzakki_rt: Array.isArray(chartMuzakkiRt) ? chartMuzakkiRt.map((row) => ({
-      nama_rt: row.nama_rt,
-      count: Number(row.count),
-    })) : [],
-    chart_asnaf_donat: Array.isArray(chartAsnafDonat) ? chartAsnafDonat.map((row) => ({
-      kategori_asnaf: row.kategori_asnaf,
-      total_nominal: Number(row.total_nominal || 0),
-      total_beras: Number(row.total_beras || 0),
-    })) : [],
+    chart_perbandingan_rt: chartPerbandinganRT,
+    chart_asnaf_uang: Array.isArray(chartAsnafDonat) ? chartAsnafDonat.map((row) => ({
+      kategori: row.kategori_asnaf,
+      jumlah: Number(row.total_nominal || 0),
+    })).filter((row) => row.jumlah > 0) : [],
+    chart_asnaf_beras: Array.isArray(chartAsnafDonat) ? chartAsnafDonat.map((row) => ({
+      kategori: row.kategori_asnaf,
+      jumlah: Number(row.total_beras || 0),
+    })).filter((row) => row.jumlah > 0) : [],
   }
 }
 
