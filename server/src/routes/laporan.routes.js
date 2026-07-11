@@ -25,7 +25,7 @@ router.get('/export', requireAdmin, asyncHandler(async (req, res) => {
   }
 
   if (parsed.format === 'xlsx') {
-    const workbook = await buildWorkbook(result.data)
+    const workbook = await buildWorkbook(result)
     const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' })
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     res.setHeader('Content-Disposition', `attachment; filename=laporan-zakat-${Date.now()}.xlsx`)
@@ -33,9 +33,9 @@ router.get('/export', requireAdmin, asyncHandler(async (req, res) => {
     return
   }
 
-  const doc = await buildPdfLaporan(result.data, parsed, {
+  const doc = await buildPdfLaporan(result, parsed, {
     MASJID_NAME: 'Masjid Al-Ikhlas',
-    ADMIN_NAME: 'Admin',
+    ADMIN_NAME: req.user?.full_name || 'Admin',
     ADMIN_JABATAN: 'Admin Masjid',
   })
   const pdfBuffer = Buffer.from(doc.output('arraybuffer'))
