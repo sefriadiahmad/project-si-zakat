@@ -25,5 +25,4 @@ export async function verifyPassword(password, hash) {
  */
 export const SEED_PASSWORDS = {
   ADMIN: 'admin123',
-  KASIR: 'kasir123',
 }

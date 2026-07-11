@@ -88,7 +88,7 @@ export default function AppLayout() {
               Masjid Al-Ikhlas
             </span>
             <span className="text-[10px] text-slate-500 font-medium">
-              Sistem Informasi Zakat
+              SIKAT
             </span>
           </div>
         </Link>

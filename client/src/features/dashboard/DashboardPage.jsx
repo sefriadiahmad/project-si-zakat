@@ -118,7 +118,7 @@ export default function DashboardPage() {
       <div className="mx-auto max-w-7xl">
         <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-medium text-emerald-700">Sistem Informasi Zakat</p>
+            <p className="text-sm font-medium text-emerald-700">SIKAT</p>
             <h1 className="text-2xl font-semibold">Dashboard</h1>
           </div>
           <div className="flex gap-2">
