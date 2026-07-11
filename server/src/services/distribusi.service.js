@@ -63,7 +63,10 @@ export async function rekomendasiPerMustahik(mustahikList, kuota, dependencies =
 
 export async function getDistribusiKuota(queryParams = {}, dependencies = {}) {
   const connection = dependencies.db || db
-  const { tahun_hijriah, tahun_masehi } = queryParams
+  const { tahun_hijriah, tahun_masehi, page = 1, limit = 10 } = queryParams
+  const pageNum = parseInt(page, 10)
+  const limitNum = parseInt(limit, 10)
+  const offset = (pageNum - 1) * limitNum
 
   // Get kuota (masuk data)
   const kuota = await hitungKuota(tahun_hijriah, tahun_masehi, { db: connection })
@@ -111,7 +114,12 @@ export async function getDistribusiKuota(queryParams = {}, dependencies = {}) {
     .count('id as total')
     .select('kategori_asnaf')
 
-  // Get verified mustahik list for recommendations
+  // Get total count of verified mustahik
+  const [{ count: totalMustahik }] = await connection('mustahik_asnaf')
+    .where('status_verifikasi', 'terverifikasi')
+    .count('id as count')
+
+  // Get paginated mustahik list for recommendations
   const mustahikList = await connection('mustahik_asnaf')
     .where('status_verifikasi', 'terverifikasi')
     .select(
@@ -121,6 +129,8 @@ export async function getDistribusiKuota(queryParams = {}, dependencies = {}) {
       'jumlah_tanggungan'
     )
     .orderBy('nama_kepala_keluarga', 'asc')
+    .limit(limitNum)
+    .offset(offset)
 
   // Calculate recommendations per mustahik
   const rekomendasi = await rekomendasiPerMustahik(mustahikList, kuota, { db: connection })
@@ -131,7 +141,13 @@ export async function getDistribusiKuota(queryParams = {}, dependencies = {}) {
     total_beras_keluar: Number(keluar?.total_beras_keluar || 0),
     distribusi_asnaf: distribusiAsnaf || [],
     mustahik_by_asnaf: mustahikByAsnaf || [],
-    rekomendasi,
+    data: rekomendasi,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total: Number(totalMustahik),
+      totalPages: Math.ceil(Number(totalMustahik) / limitNum),
+    },
   }
 }
 

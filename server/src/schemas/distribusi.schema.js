@@ -13,6 +13,18 @@ export const DistribusiKuotaQuerySchema = z.object({
     .min(2000, 'Tahun masehi tidak valid')
     .max(2100, 'Tahun masehi tidak valid')
     .optional(),
+  page: z.coerce
+    .number({ invalid_type_error: 'Page harus berupa angka' })
+    .int('Page harus bilangan bulat')
+    .positive('Page tidak valid')
+    .optional()
+    .default(1),
+  limit: z.coerce
+    .number({ invalid_type_error: 'Limit harus berupa angka' })
+    .int('Limit harus bilangan bulat')
+    .positive('Limit tidak valid')
+    .optional()
+    .default(10),
 })
 
 export const ZakatKeluarSchema = z.object({
