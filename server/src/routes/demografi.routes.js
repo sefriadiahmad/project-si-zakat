@@ -5,10 +5,12 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 import {
   getDemografiSummary,
   getDemografiRTDetail,
+  createWilayahRT,
 } from '../services/demografi.service.js'
 import {
   DemografiQuerySchema,
   DemografiRTDetailQuerySchema,
+  CreateWilayahRTSchema,
 } from '../schemas/demografi.schema.js'
 
 const router = Router()
@@ -50,6 +52,19 @@ router.get(
     const parsed = DemografiRTDetailQuerySchema.parse(req.query)
     const result = await getDemografiRTDetail(rtId, parsed || {})
     res.json(result)
+  })
+)
+
+/**
+ * POST /api/demografi
+ * Create a new wilayah RT
+ */
+router.post(
+  '/',
+  asyncHandler(async (req, res) => {
+    const parsed = CreateWilayahRTSchema.parse(req.body)
+    const result = await createWilayahRT(parsed)
+    res.status(201).json(result)
   })
 )
 

@@ -25,3 +25,15 @@ export const DemografiRTDetailQuerySchema = z.object({
     .regex(/^\d{4}$/, 'Tahun masehi harus 4 digit')
     .optional(),
 })
+
+/**
+ * Body schema for creating wilayah RT
+ */
+export const CreateWilayahRTSchema = z.object({
+  nama_rt: z.string()
+    .min(1, 'Nama RT tidak boleh kosong')
+    .max(50, 'Nama RT maksimal 50 karakter'),
+  keterangan: z.string()
+    .max(500, 'Keterangan maksimal 500 karakter')
+    .optional(),
+})

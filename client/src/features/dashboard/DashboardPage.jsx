@@ -321,7 +321,7 @@ export default function DashboardPage() {
                           contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
                           formatter={(value) => [value, 'Jumlah']}
                         />
-                        <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>

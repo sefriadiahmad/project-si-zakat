@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/static-components */
 import { useState, useMemo } from 'react'
-import { ArrowUpDown, MapPin, Users, UserCheck, TrendingUp, TrendingDown, Package } from 'lucide-react'
+import { ArrowUpDown, MapPin, Users, UserCheck, TrendingUp, TrendingDown, Package, Plus } from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -11,20 +11,36 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts'
+import api from '@shared/lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/card'
 import { Input } from '@shared/components/input'
 import { Label } from '@shared/components/label'
 import { Button } from '@shared/components/button'
 import { Skeleton } from '@shared/components/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@shared/components/dialog'
+import { useToast } from '@shared/components/toaster'
 import { useDemografiData, formatCurrency, formatKg } from './useDemografiData'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function DemografiPage() {
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
   const [tahunHijriah, setTahunHijriah] = useState('')
   const [tahunMasehi, setTahunMasehi] = useState('')
   const [sortField, setSortField] = useState('nama_rt')
   const [sortDirection, setSortDirection] = useState('asc')
   const [selectedRT, setSelectedRT] = useState('all')
+  const [showAddRTModal, setShowAddRTModal] = useState(false)
+  const [newRTNama, setNewRTNama] = useState('')
+  const [newRTKeterangan, setNewRTKeterangan] = useState('')
+  const [isCreating, setIsCreating] = useState(false)
 
   const filter = useMemo(() => {
     const params = {}
@@ -163,21 +179,65 @@ export default function DemografiPage() {
     )
   }
 
+  const handleCreateRT = async () => {
+    if (!newRTNama.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Validasi Gagal',
+        description: 'Nama RT tidak boleh kosong.',
+      })
+      return
+    }
+
+    setIsCreating(true)
+    try {
+      await api.post('/demografi', {
+        nama_rt: newRTNama.trim(),
+        keterangan: newRTKeterangan.trim() || null,
+      })
+      toast({
+        title: 'RT Berhasil Ditambahkan',
+        description: `Wilayah ${newRTNama} berhasil ditambahkan.`,
+      })
+      queryClient.invalidateQueries({ queryKey: ['demografi'] })
+      setShowAddRTModal(false)
+      setNewRTNama('')
+      setNewRTKeterangan('')
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Gagal Menambahkan RT',
+        description: error.response?.data?.message || 'Terjadi kesalahan sistem.',
+      })
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 p-4 text-slate-950 sm:p-6">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <header className="mb-6">
-          <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
-            <MapPin className="h-4 w-4" />
-            Pemetaan Demografi
+        <header className="flex items-start justify-between mb-6">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
+              <MapPin className="h-4 w-4" />
+              Pemetaan Demografi
+            </div>
+            <h1 className="text-2xl font-semibold text-slate-900 mt-1">
+              Demografi per Wilayah RT
+            </h1>
+            <p className="text-sm text-slate-500 mt-1">
+              Lihat persebaran muzakki dan mustahik per wilayah RT
+            </p>
           </div>
-          <h1 className="text-2xl font-semibold text-slate-900 mt-1">
-            Demografi per Wilayah RT
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Lihat persebaran muzakki dan mustahik per wilayah RT
-          </p>
+          <Button
+            onClick={() => setShowAddRTModal(true)}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 cursor-pointer"
+          >
+            <Plus className="h-4 w-4" />
+            Tambah RT
+          </Button>
         </header>
 
         {/* Filter Card */}
@@ -437,7 +497,7 @@ export default function DemografiPage() {
                           contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
                           formatter={(value) => [`${value} keluarga`, 'Jumlah']}
                         />
-                        <Bar dataKey="jumlah" name="Jumlah Keluarga" fill="#10b981" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="jumlah" name="Jumlah Keluarga" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -589,6 +649,56 @@ export default function DemografiPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Add RT Dialog */}
+        <Dialog open={showAddRTModal} onOpenChange={setShowAddRTModal}>
+          <DialogContent className="bg-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-emerald-600" />
+                Tambah Wilayah RT Baru
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="namaRT">Nama RT *</Label>
+                <Input
+                  id="namaRT"
+                  value={newRTNama}
+                  onChange={(e) => setNewRTNama(e.target.value)}
+                  placeholder="Contoh: RT 01"
+                  className="bg-white border-slate-200"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="keterangan">Keterangan</Label>
+                <Input
+                  id="keterangan"
+                  value={newRTKeterangan}
+                  onChange={(e) => setNewRTKeterangan(e.target.value)}
+                  placeholder="Contoh: Jl. Masjid Al-Ikhlas"
+                  className="bg-white border-slate-200"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowAddRTModal(false)}
+                className="border-slate-200"
+              >
+                Batal
+              </Button>
+              <Button
+                onClick={handleCreateRT}
+                disabled={isCreating}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+              >
+                {isCreating ? 'Menyimpan...' : 'Simpan'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

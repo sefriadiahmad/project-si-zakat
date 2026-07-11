@@ -19,6 +19,37 @@ function buildPeriodFilter(query, tahunHijriah, tahunMasehi) {
 }
 
 /**
+ * Create a new wilayah RT
+ * @param {Object} data - RT data
+ * @param {string} data.nama_rt - Nama RT (required, unique)
+ * @param {string} data.keterangan - Keterangan (optional)
+ * @param {Object} dependencies - Dependency injection
+ * @returns {Promise<Object>} Created RT
+ */
+export async function createWilayahRT(data, dependencies = {}) {
+  const connection = dependencies.db || db
+  const { nama_rt, keterangan } = data
+
+  // Check if nama_rt already exists
+  const existing = await connection('wilayah_rt')
+    .where('nama_rt', nama_rt)
+    .first()
+
+  if (existing) {
+    throw new AppError('Nama RT sudah digunakan', 400, ErrorCodes.VALIDATION_ERROR)
+  }
+
+  const [created] = await connection('wilayah_rt')
+    .insert({
+      nama_rt,
+      keterangan: keterangan || null,
+    })
+    .returning('*')
+
+  return created
+}
+
+/**
  * Get demografi summary for all RTs
  * Aggregasi per RT: jumlah muzakki aktif, mustahik terverifikasi,
  * total dana masuk, total distribusi keluar, rasio muzakki/mustahik

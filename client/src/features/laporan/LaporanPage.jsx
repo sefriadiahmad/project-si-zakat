@@ -147,7 +147,7 @@ export default function LaporanPage() {
                 <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue placeholder="Semua Jenis" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60 overflow-y-auto bg-white border-slate-200">
                   <SelectItem value="semua">Semua Jenis</SelectItem>
                   {JENIS_ZAKAT.map((jenis) => (
                     <SelectItem key={jenis} value={jenis}>
@@ -163,7 +163,7 @@ export default function LaporanPage() {
                 <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue placeholder="Semua Wilayah RT" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60 overflow-y-auto bg-white border-slate-200">
                   <SelectItem value="all">Semua Wilayah RT</SelectItem>
                   {rtList.map((rt) => (
                     <SelectItem key={rt.id} value={rt.id.toString()}>
@@ -179,7 +179,7 @@ export default function LaporanPage() {
                 <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue placeholder="Pilih format..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60 overflow-y-auto bg-white border-slate-200">
                   <SelectItem value="pdf">PDF</SelectItem>
                   <SelectItem value="xlsx">XLSX</SelectItem>
                 </SelectContent>
@@ -191,7 +191,7 @@ export default function LaporanPage() {
           <Button
             onClick={handleExport}
             disabled={isExporting}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 cursor-pointer"
           >
             <Download className="h-4 w-4" />
             {isExporting ? 'Mengekspor...' : 'Ekspor Laporan'}
