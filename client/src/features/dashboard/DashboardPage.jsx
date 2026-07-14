@@ -114,57 +114,57 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 p-4 text-slate-950 sm:p-6">
+    <main className="min-h-screen bg-slate-50 p-3 sm:p-4 sm:p-6 text-slate-950">
       <div className="mx-auto max-w-7xl">
-        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <header className="mb-4 sm:mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-medium text-emerald-700">SIKAT</p>
-            <h1 className="text-2xl font-semibold">Dashboard</h1>
+            <p className="text-xs sm:text-sm font-medium text-emerald-700">SIKAT</p>
+            <h1 className="text-xl sm:text-2xl font-semibold">Dashboard</h1>
           </div>
           <div className="flex gap-2">
             {user?.role === 'admin_masjid' && (
-              <Button variant="outline" onClick={() => setUserModalOpen(true)} className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
-                <UserPlus className="h-4 w-4" />
-                Tambah Admin
+              <Button variant="outline" onClick={() => setUserModalOpen(true)} className="border-emerald-200 text-emerald-700 hover:bg-emerald-50 text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2">
+                <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Tambah Admin</span>
               </Button>
             )}
-            <Button variant="outline" onClick={logout}>
-              <LogOut className="h-4 w-4" />
-              Keluar
+            <Button variant="outline" onClick={logout} className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2">
+              <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Keluar</span>
             </Button>
           </div>
         </header>
 
-        <Card className="rounded-lg mb-6">
-          <CardContent className="p-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <Card className="rounded-lg mb-4 sm:mb-6">
+          <CardContent className="p-3 sm:p-4 sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-sm text-slate-600">
+                <p className="text-xs sm:text-sm text-slate-600">
                   Selamat datang, <span className="font-semibold text-slate-900">{user?.fullName}</span>
                 </p>
-                <p className="text-xs text-slate-500">Peran: {ROLE_LABELS[user?.role] || user?.role}</p>
+                <p className="text-[10px] sm:text-xs text-slate-500">Peran: {ROLE_LABELS[user?.role] || user?.role}</p>
               </div>
-              <div className="flex gap-3">
-                <div className="space-y-1">
-                  <Label htmlFor="tahunHijriah" className="text-xs font-medium text-slate-700">Tahun Hijriah</Label>
+              <div className="flex gap-2 sm:gap-3">
+                <div className="space-y-1 flex-1 sm:flex-none">
+                  <Label htmlFor="tahunHijriah" className="text-[10px] sm:text-xs font-medium text-slate-700">Tahun Hijriah</Label>
                   <Input
                     id="tahunHijriah"
                     type="number"
-                    placeholder="Contoh: 1446"
+                    placeholder="1446"
                     value={tahunHijriah}
                     onChange={(e) => setTahunHijriah(e.target.value)}
-                    className="h-9 w-32 bg-white border-slate-200"
+                    className="h-8 sm:h-9 w-full sm:w-28 bg-white border-slate-200 text-xs"
                   />
                 </div>
-                <div className="space-y-1">
-                  <Label htmlFor="tahunMasehi" className="text-xs font-medium text-slate-700">Tahun Masehi</Label>
+                <div className="space-y-1 flex-1 sm:flex-none">
+                  <Label htmlFor="tahunMasehi" className="text-[10px] sm:text-xs font-medium text-slate-700">Tahun Masehi</Label>
                   <Input
                     id="tahunMasehi"
                     type="number"
-                    placeholder="Contoh: 2025"
+                    placeholder="2025"
                     value={tahunMasehi}
                     onChange={(e) => setTahunMasehi(e.target.value)}
-                    className="h-9 w-32 bg-white border-slate-200"
+                    className="h-8 sm:h-9 w-full sm:w-28 bg-white border-slate-200 text-xs"
                   />
                 </div>
               </div>
@@ -173,16 +173,16 @@ export default function DashboardPage() {
         </Card>
 
         {isLoading && (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
             {kpiCards.map((_, idx) => (
               <Card key={idx} className="rounded-xl border border-slate-200/80 shadow-sm">
-                <CardContent className="p-6">
+                <CardContent className="p-3 sm:p-4 sm:p-6">
                   <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-8 w-24" />
+                    <div className="space-y-1 sm:space-y-2 min-w-0 flex-1 mr-2">
+                      <Skeleton className="h-3 sm:h-4 w-20 sm:w-32" />
+                      <Skeleton className="h-5 sm:h-8 w-16 sm:w-24" />
                     </div>
-                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <Skeleton className="h-8 w-8 sm:h-10 sm:w-10 rounded-full flex-shrink-0" />
                   </div>
                 </CardContent>
               </Card>
@@ -213,16 +213,16 @@ export default function DashboardPage() {
         {!isLoading && !isError && (
           <>
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
               {kpiCards.map((card, idx) => (
                 <Card key={idx} className="rounded-xl border border-slate-200/80 shadow-sm">
-                  <CardContent className="p-6">
+                  <CardContent className="p-3 sm:p-4 sm:p-6">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-slate-600">{card.title}</p>
-                        <p className="text-2xl font-bold text-slate-900 mt-1">{card.value}</p>
+                      <div className="min-w-0 flex-1 mr-2">
+                        <p className="text-[10px] sm:text-sm font-medium text-slate-600 truncate">{card.title}</p>
+                        <p className="text-base sm:text-xl lg:text-2xl font-bold text-slate-900 mt-0.5 sm:mt-1">{card.value}</p>
                       </div>
-                      <span className={`text-2xl ${card.color}`}>{card.icon}</span>
+                      <span className={`text-xl sm:text-2xl flex-shrink-0 ${card.color}`}>{card.icon}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -230,18 +230,18 @@ export default function DashboardPage() {
             </div>
 
             {/* Row 1: Perbandingan Dana & Beras */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 mb-4 sm:mb-6">
               <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-                <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-                  <CardTitle className="text-lg font-bold text-slate-900">Perbandingan Dana</CardTitle>
+                <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-3 sm:p-4">
+                  <CardTitle className="text-base sm:text-lg font-bold text-slate-900">Perbandingan Dana</CardTitle>
                 </CardHeader>
-                <CardContent className="p-4">
-                  <div className="h-64">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="h-48 sm:h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={perbandinganDanaData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="#64748b" />
-                        <YAxis tick={{ fontSize: 12 }} stroke="#64748b" />
+                        <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#64748b" />
+                        <YAxis tick={{ fontSize: 11 }} stroke="#64748b" />
                         <Tooltip
                           contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
                           formatter={(value) => [formatCurrency(value), 'Jumlah']}
@@ -257,16 +257,16 @@ export default function DashboardPage() {
               </Card>
 
               <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-                <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-                  <CardTitle className="text-lg font-bold text-slate-900">Perbandingan Beras</CardTitle>
+                <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-3 sm:p-4">
+                  <CardTitle className="text-base sm:text-lg font-bold text-slate-900">Perbandingan Beras</CardTitle>
                 </CardHeader>
-                <CardContent className="p-4">
-                  <div className="h-64">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="h-48 sm:h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={perbandinganBerasData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="#64748b" />
-                        <YAxis tick={{ fontSize: 12 }} stroke="#64748b" />
+                        <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#64748b" />
+                        <YAxis tick={{ fontSize: 11 }} stroke="#64748b" />
                         <Tooltip
                           contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
                           formatter={(value) => [formatKg(value), 'Jumlah']}
@@ -283,18 +283,18 @@ export default function DashboardPage() {
             </div>
 
             {/* Row 2: Muzakki per RT & Mustahik per Asnaf */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 mb-4 sm:mb-6">
               <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-                <CardHeader className="bg-slate-50/50 border-b border-b border-slate-100">
-                  <CardTitle className="text-lg font-bold text-slate-900">Muzakki per RT</CardTitle>
+                <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-3 sm:p-4">
+                  <CardTitle className="text-base sm:text-lg font-bold text-slate-900">Muzakki per RT</CardTitle>
                 </CardHeader>
-                <CardContent className="p-4">
-                  <div className="h-72">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="h-56 sm:h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={data?.chart_muzakki_rt || []}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey="nama_rt" tick={{ fontSize: 10 }} stroke="#64748b" />
-                        <YAxis tick={{ fontSize: 10 }} stroke="#64748b" />
+                        <XAxis dataKey="nama_rt" tick={{ fontSize: 9 }} stroke="#64748b" />
+                        <YAxis tick={{ fontSize: 9 }} stroke="#64748b" />
                         <Tooltip
                           contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
                           formatter={(value) => [value, 'Jumlah']}
@@ -307,16 +307,16 @@ export default function DashboardPage() {
               </Card>
 
               <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-                <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-                  <CardTitle className="text-lg font-bold text-slate-900">Mustahik per Asnaf</CardTitle>
+                <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-3 sm:p-4">
+                  <CardTitle className="text-base sm:text-lg font-bold text-slate-900">Mustahik per Asnaf</CardTitle>
                 </CardHeader>
-                <CardContent className="p-4">
-                  <div className="h-72">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="h-56 sm:h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={mustahikByAsnafData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey="kategori_asnaf" tick={{ fontSize: 10 }} stroke="#64748b" />
-                        <YAxis tick={{ fontSize: 10 }} stroke="#64748b" />
+                        <XAxis dataKey="kategori_asnaf" tick={{ fontSize: 9 }} stroke="#64748b" />
+                        <YAxis tick={{ fontSize: 9 }} stroke="#64748b" />
                         <Tooltip
                           contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
                           formatter={(value) => [value, 'Jumlah']}
@@ -330,22 +330,22 @@ export default function DashboardPage() {
             </div>
 
             {/* Row 3: Asnaf Uang & Asnaf Beras */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 mb-4 sm:mb-6">
               <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-                <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-                  <CardTitle className="text-lg font-bold text-slate-900">Distribusi Asnaf (Uang)</CardTitle>
+                <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-3 sm:p-4">
+                  <CardTitle className="text-base sm:text-lg font-bold text-slate-900">Distribusi Asnaf (Uang)</CardTitle>
                 </CardHeader>
-                <CardContent className="p-4">
-                  <div className="h-72">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="h-56 sm:h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={asnafUangData}
                           cx="50%"
                           cy="50%"
-                          labelLine={true}
-                          label={({ kategori_asnaf, percent }) => `${labelMap[kategori_asnaf] || kategori_asnaf}: ${(percent * 100).toFixed(0)}%`}
-                          outerRadius={90}
+                          labelLine={false}
+                          label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                          outerRadius={60}
                           fill="#8884d8"
                           dataKey="total_nominal"
                           nameKey="kategori_asnaf"
@@ -356,9 +356,9 @@ export default function DashboardPage() {
                         </Pie>
                         <Tooltip
                           contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                          formatter={(value) => [formatCurrency(value), 'Total']}
+                          formatter={(value, name) => [formatCurrency(value), labelMap[name] || name]}
                         />
-                        <Legend />
+                        <Legend formatter={(value) => labelMap[value] || value} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -366,20 +366,20 @@ export default function DashboardPage() {
               </Card>
 
               <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-                <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-                  <CardTitle className="text-lg font-bold text-slate-900">Distribusi Asnaf (Beras)</CardTitle>
+                <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-3 sm:p-4">
+                  <CardTitle className="text-base sm:text-lg font-bold text-slate-900">Distribusi Asnaf (Beras)</CardTitle>
                 </CardHeader>
-                <CardContent className="p-4">
-                  <div className="h-72">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="h-56 sm:h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={asnafBerasData}
                           cx="50%"
                           cy="50%"
-                          labelLine={true}
-                          label={({ kategori_asnaf, percent }) => `${labelMap[kategori_asnaf] || kategori_asnaf}: ${(percent * 100).toFixed(0)}%`}
-                          outerRadius={90}
+                          labelLine={false}
+                          label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                          outerRadius={60}
                           fill="#8884d8"
                           dataKey="total_beras"
                           nameKey="kategori_asnaf"
@@ -390,9 +390,9 @@ export default function DashboardPage() {
                         </Pie>
                         <Tooltip
                           contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                          formatter={(value) => [formatKg(value), 'Total']}
+                          formatter={(value, name) => [formatKg(value), labelMap[name] || name]}
                         />
-                        <Legend />
+                        <Legend formatter={(value) => labelMap[value] || value} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
