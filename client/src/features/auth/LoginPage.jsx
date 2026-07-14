@@ -51,10 +51,10 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl px-4 py-8 sm:px-6 lg:py-0 lg:px-8">
+    <main className="min-h-screen bg-slate-50 text-slate-950 safe-area-top">
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl px-4 py-6 sm:py-8 sm:px-6 lg:py-0 lg:px-8">
         {/* Mobile: Kembali button di atas */}
-        <div className="flex w-full flex-col items-center justify-center gap-6 lg:flex-row lg:gap-8">
+        <div className="flex w-full flex-col items-center justify-center gap-4 sm:gap-6 lg:flex-row lg:gap-8">
           {/* Desktop: Teks di kiri, Mobile: Teks disembunyikan di sini */}
           <div className="hidden lg:block lg:w-1/2">
             <p className="mb-3 text-sm font-medium text-emerald-700">Sistem Informasi Zakat</p>
@@ -69,43 +69,43 @@ export default function LoginPage() {
           {/* Form Login Card */}
           <div className="flex w-full flex-col gap-4 lg:w-[420px]">
             {/* Mobile: Kembali button */}
-            <div>
+            <div className="w-full sm:w-[420px]">
               <Link
                 to="/"
-                className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-emerald-600 transition-colors"
+                className="inline-flex items-center gap-1 text-xs sm:text-sm text-slate-500 hover:text-emerald-600 transition-colors"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Kembali ke Beranda
               </Link>
             </div>
 
-            <Card className="rounded-lg border-slate-200 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-xl">Masuk</CardTitle>
-                <CardDescription>Gunakan akun Admin Masjid atau Kasir Amil.</CardDescription>
+            <Card className="w-full sm:w-[420px] rounded-lg border-slate-200 shadow-sm">
+              <CardHeader className="pb-3 sm:pb-4">
+                <CardTitle className="text-lg sm:text-xl">Masuk</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Gunakan akun Admin Masjid atau Kasir Amil.</CardDescription>
               </CardHeader>
             <CardContent>
-              <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+              <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit(onSubmit)}>
                 <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
+                  <Label htmlFor="username" className="text-sm">Username</Label>
                   <div className="relative">
                     <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
                       id="username"
                       autoComplete="username"
                       maxLength={50}
-                      className="pl-9"
+                      className="pl-9 h-10 sm:h-11"
                       aria-invalid={Boolean(errors.username)}
                       {...register('username')}
                     />
                   </div>
                   {errors.username ? (
-                    <p className="text-sm text-red-600">{errors.username.message}</p>
+                    <p className="text-xs sm:text-sm text-red-600">{errors.username.message}</p>
                   ) : null}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-sm">Password</Label>
                   <div className="relative">
                     <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
@@ -113,7 +113,7 @@ export default function LoginPage() {
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="current-password"
                       maxLength={50}
-                      className="pl-9 pr-10"
+                      className="pl-9 pr-10 h-10 sm:h-11"
                       aria-invalid={Boolean(errors.password)}
                       {...register('password')}
                     />
@@ -131,17 +131,17 @@ export default function LoginPage() {
                     </button>
                   </div>
                   {errors.password ? (
-                    <p className="text-sm text-red-600">{errors.password.message}</p>
+                    <p className="text-xs sm:text-sm text-red-600">{errors.password.message}</p>
                   ) : null}
                 </div>
 
                 {apiError ? (
-                  <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs sm:text-sm text-red-700">
                     {apiError}
                   </div>
                 ) : null}
 
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                <Button type="submit" className="w-full h-10 sm:h-11" disabled={isSubmitting}>
                   <LogIn className="h-4 w-4" />
                   {isSubmitting ? 'Memproses...' : 'Masuk'}
                 </Button>
@@ -150,12 +150,12 @@ export default function LoginPage() {
           </Card>
 
             {/* Mobile: Teks di bawah card */}
-            <div className="lg:hidden text-center mt-6">
-              <p className="mb-2 text-sm font-medium text-emerald-700">Sistem Informasi Zakat</p>
-              <h2 className="text-xl font-semibold text-slate-900">
+            <div className="lg:hidden text-center mt-4 sm:mt-6 px-2">
+              <p className="mb-2 text-xs sm:text-sm font-medium text-emerald-700">Sistem Informasi Zakat</p>
+              <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
                 Operasional zakat masjid dalam satu ruang kerja yang tertib.
               </h2>
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-xs sm:text-sm text-slate-600">
                 Masuk untuk mengelola data muzakki, mustahik, transaksi, distribusi, dan laporan sesuai peran akun.
               </p>
             </div>
