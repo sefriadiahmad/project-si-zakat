@@ -146,56 +146,61 @@ export default function FunnelFormPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="mx-auto max-w-3xl space-y-4 sm:space-y-6 min-w-0">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Transaksi Zakat Baru</h1>
-          <p className="text-sm text-slate-500">Pencatatan pembayaran zakat, infaq, dan sedekah.</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Transaksi Zakat Baru</h1>
+          <p className="text-xs sm:text-sm text-slate-500">Pencatatan pembayaran zakat, infaq, dan sedekah.</p>
         </div>
         {step > 1 && (
-          <Button variant="outline" onClick={handleBack} className="border-slate-200">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+          <Button variant="outline" onClick={handleBack} className="gap-1.5 sm:gap-2 border-slate-200 text-xs sm:text-sm w-full sm:w-auto">
+            <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Kembali
           </Button>
         )}
       </div>
 
-      <div className="flex items-center justify-between bg-white rounded-xl border border-slate-200/80 shadow-sm p-4">
-        {STEP_LABELS.map((label, idx) => (
-          <div key={label} className="flex items-center gap-2">
-            <div
-              className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                step > idx + 1
-                  ? 'bg-emerald-600 text-white'
-                  : step === idx + 1
-                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                    : 'bg-slate-100 text-slate-500'
-              }`}
-            >
-              {step > idx + 1 ? '✓' : idx + 1}
+      {/* Step Indicators - Horizontal Scroll */}
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-3 sm:p-4 overflow-x-auto">
+        <div className="flex items-center justify-start sm:justify-between min-w-max sm:min-w-0">
+          {STEP_LABELS.map((label, idx) => (
+            <div key={label} className="flex items-center">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                <div
+                  className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${
+                    step > idx + 1
+                      ? 'bg-emerald-600 text-white'
+                      : step === idx + 1
+                        ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                        : 'bg-slate-100 text-slate-500'
+                  }`}
+                >
+                  {step > idx + 1 ? '✓' : idx + 1}
+                </div>
+                <span className={`text-[10px] sm:text-sm font-medium ${step === idx + 1 ? 'text-slate-900' : 'text-slate-500'}`}>{label}</span>
+              </div>
+              {idx < STEP_LABELS.length - 1 && <div className="w-6 sm:w-8 h-px bg-slate-200 mx-1 sm:mx-2" />}
             </div>
-            <span className={`text-sm font-medium ${step === idx + 1 ? 'text-slate-900' : 'text-slate-500'}`}>{label}</span>
-            {idx < STEP_LABELS.length - 1 && <div className="w-8 h-px bg-slate-200 mx-2" />}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-        <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-          <CardTitle className="text-lg font-bold text-slate-900">{STEP_LABELS[step - 1]}</CardTitle>
+        <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-3 sm:p-4">
+          <CardTitle className="text-base sm:text-lg font-bold text-slate-900">{STEP_LABELS[step - 1]}</CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           {step === 1 && (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="space-y-2">
-                <Label className="font-medium text-slate-700">Cari Muzakki</Label>
+                <Label className="font-medium text-slate-700 text-sm">Cari Muzakki</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <Input
                     placeholder="Ketik nama atau nomor telepon..."
                     value={muzakkiSearch}
                     onChange={(e) => setMuzakkiSearch(e.target.value)}
-                    className="pl-9 bg-slate-50/50 border-slate-200"
+                    className="pl-9 bg-slate-50/50 border-slate-200 h-10"
                   />
                 </div>
               </div>
@@ -205,24 +210,24 @@ export default function FunnelFormPage() {
                     <button
                       key={m.id}
                       type="button"
-                      className="w-full text-left px-4 py-3 hover:bg-slate-50 flex items-center justify-between"
+                      className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-slate-50 flex items-center justify-between"
                       onClick={() => handleSelectMuzakki(m)}
                     >
                       <div>
-                        <p className="font-medium text-slate-900">{m.nama_lengkap}</p>
-                        <p className="text-xs text-slate-500">{m.no_telepon} · {m.nama_rt || `RT ${m.wilayah_rt_id}`}</p>
+                        <p className="font-medium text-slate-900 text-sm">{m.nama_lengkap}</p>
+                        <p className="text-[10px] sm:text-xs text-slate-500">{m.no_telepon} · {m.nama_rt || `RT ${m.wilayah_rt_id}`}</p>
                       </div>
                     </button>
                   ))}
                 </div>
               )}
               {selectedMuzakki && (
-                <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-4 flex items-center justify-between">
+                <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <p className="font-semibold text-emerald-900">{selectedMuzakki.nama_lengkap}</p>
-                    <p className="text-sm text-emerald-700">{selectedMuzakki.no_telepon} · {selectedMuzakki.nama_rt || `RT ${selectedMuzakki.wilayah_rt_id}`}</p>
+                    <p className="font-semibold text-emerald-900 text-sm">{selectedMuzakki.nama_lengkap}</p>
+                    <p className="text-xs text-emerald-700">{selectedMuzakki.no_telepon} · {selectedMuzakki.nama_rt || `RT ${selectedMuzakki.wilayah_rt_id}`}</p>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => setSelectedMuzakki(null)} className="text-emerald-700">
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedMuzakki(null)} className="text-emerald-700 text-xs sm:text-sm">
                     Ganti
                   </Button>
                 </div>
@@ -231,8 +236,8 @@ export default function FunnelFormPage() {
           )}
 
           {step === 2 && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {JENIS_ZAKAT.map((jenis) => {
                   const isActive = items.some((i) => i.jenis_zakat === jenis)
                   const item = items.find((i) => i.jenis_zakat === jenis)
@@ -243,19 +248,19 @@ export default function FunnelFormPage() {
                   return (
                     <div
                       key={jenis}
-                      className={`rounded-lg border p-4 transition-colors ${isActive ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200 bg-white'}`}
+                      className={`rounded-lg border p-3 sm:p-4 transition-colors ${isActive ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200 bg-white'}`}
                     >
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center justify-between mb-2 sm:mb-3">
                         <div className="flex items-center gap-2">
                           <Checkbox
                             checked={isActive}
                             onCheckedChange={() => toggleItem(jenis)}
                           />
-                          <Label className="font-semibold text-slate-900">{JENIS_ZAKAT_LABELS[jenis]}</Label>
+                          <Label className="font-semibold text-slate-900 text-sm">{JENIS_ZAKAT_LABELS[jenis]}</Label>
                         </div>
                       </div>
                       {isActive && (
-                        <div className="space-y-3 pl-6">
+                        <div className="space-y-2 sm:space-y-3 pl-6 sm:pl-7">
                           {showNominal && (
                             <div className="space-y-1">
                               <Label className="text-xs font-medium text-slate-600">Nominal (Rp)</Label>
@@ -264,7 +269,7 @@ export default function FunnelFormPage() {
                                 min={0}
                                 value={item?.nominal || 0}
                                 onChange={(e) => updateItem(jenis, 'nominal', Number(e.target.value))}
-                                className="bg-white border-slate-200"
+                                className="bg-white border-slate-200 h-9 sm:h-10"
                               />
                             </div>
                           )}
@@ -277,7 +282,7 @@ export default function FunnelFormPage() {
                                 step="0.01"
                                 value={item?.berat_kg || 0}
                                 onChange={(e) => updateItem(jenis, 'berat_kg', Number(e.target.value))}
-                                className="bg-white border-slate-200"
+                                className="bg-white border-slate-200 h-9 sm:h-10"
                               />
                             </div>
                           )}
@@ -290,7 +295,7 @@ export default function FunnelFormPage() {
                                 max={99}
                                 value={item?.jumlah_jiwa || 1}
                                 onChange={(e) => updateItem(jenis, 'jumlah_jiwa', Math.min(99, Math.max(1, Number(e.target.value))))}
-                                className="bg-white border-slate-200"
+                                className="bg-white border-slate-200 h-9 sm:h-10"
                               />
                             </div>
                           )}
@@ -302,7 +307,7 @@ export default function FunnelFormPage() {
                                 min={0}
                                 value={item?.kembalian_infaq || 0}
                                 onChange={(e) => updateItem(jenis, 'kembalian_infaq', Number(e.target.value))}
-                                className="bg-white border-slate-200"
+                                className="bg-white border-slate-200 h-9 sm:h-10"
                               />
                             </div>
                           )}
@@ -313,14 +318,14 @@ export default function FunnelFormPage() {
                 })}
               </div>
               {items.length > 0 && (
-                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 flex items-center justify-between">
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <p className="text-sm font-medium text-slate-700">Total Real-time</p>
-                    <p className="text-xs text-slate-500">Berdasarkan nilai yang Anda isi</p>
+                    <p className="text-xs sm:text-sm font-medium text-slate-700">Total Real-time</p>
+                    <p className="text-[10px] sm:text-xs text-slate-500">Berdasarkan nilai yang Anda isi</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-slate-900">Rp {totalNominal.toLocaleString('id-ID')}</p>
-                    <p className="text-sm font-medium text-slate-700">{totalBeras.toLocaleString('id-ID')} kg</p>
+                    <p className="text-base sm:text-lg font-bold text-slate-900">Rp {totalNominal.toLocaleString('id-ID')}</p>
+                    <p className="text-xs sm:text-sm font-medium text-slate-700">{totalBeras.toLocaleString('id-ID')} kg</p>
                   </div>
                 </div>
               )}
@@ -328,11 +333,11 @@ export default function FunnelFormPage() {
           )}
 
           {step === 3 && (
-            <div className="space-y-6 max-w-xl">
+            <div className="space-y-4 sm:space-y-6 max-w-xl">
               <div className="space-y-2">
-                <Label className="font-medium text-slate-700">Metode Pembayaran</Label>
+                <Label className="font-medium text-slate-700 text-sm">Metode Pembayaran</Label>
                 <Select value={metodeBayar} onValueChange={setMetodeBayar}>
-                  <SelectTrigger className="bg-white border-slate-200">
+                  <SelectTrigger className="bg-white border-slate-200 h-10">
                     <SelectValue placeholder="Pilih metode bayar..." />
                   </SelectTrigger>
                   <SelectContent className="max-h-60 overflow-y-auto bg-white border border-slate-200 shadow-md">
@@ -344,39 +349,39 @@ export default function FunnelFormPage() {
               </div>
               {['transfer', 'qris'].includes(metodeBayar) && (
                 <div className="space-y-2">
-                  <Label className="font-medium text-slate-700">Nomor Referensi</Label>
+                  <Label className="font-medium text-slate-700 text-sm">Nomor Referensi</Label>
                   <Input
                     placeholder="Minimal 5 karakter"
                     value={noReferensi}
                     onChange={(e) => setNoReferensi(e.target.value)}
-                    className="bg-white border-slate-200"
+                    className="bg-white border-slate-200 h-10"
                   />
                   {noReferensi.length > 0 && noReferensi.length < 5 && (
                     <p className="text-xs text-red-600">Nomor referensi minimal 5 karakter.</p>
                   )}
                 </div>
               )}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="font-medium text-slate-700">Tahun Hijriah</Label>
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="space-y-1">
+                  <Label className="text-xs sm:text-sm font-medium text-slate-700">Tahun Hijriah</Label>
                   <Input
                     type="number"
                     min={1400}
                     max={1500}
                     value={tahunHijriah}
                     onChange={(e) => setTahunHijriah(Number(e.target.value))}
-                    className="bg-white border-slate-200"
+                    className="bg-white border-slate-200 h-10"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label className="font-medium text-slate-700">Tahun Masehi</Label>
+                <div className="space-y-1">
+                  <Label className="text-xs sm:text-sm font-medium text-slate-700">Tahun Masehi</Label>
                   <Input
                     type="number"
                     min={2000}
                     max={2100}
                     value={tahunMasehi}
                     onChange={(e) => setTahunMasehi(Number(e.target.value))}
-                    className="bg-white border-slate-200"
+                    className="bg-white border-slate-200 h-10"
                   />
                 </div>
               </div>
@@ -384,64 +389,66 @@ export default function FunnelFormPage() {
           )}
 
           {step === 4 && (
-            <div className="space-y-6">
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2">
-                <p className="text-sm font-medium text-slate-700">Muzakki: <span className="font-semibold text-slate-900">{selectedMuzakki?.nama_lengkap}</span></p>
-                <p className="text-sm text-slate-600">Metode Bayar: {METODE_BAYAR_LABELS[metodeBayar]}</p>
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 sm:p-4 space-y-1.5 sm:space-y-2">
+                <p className="text-xs sm:text-sm font-medium text-slate-700">Muzakki: <span className="font-semibold text-slate-900">{selectedMuzakki?.nama_lengkap}</span></p>
+                <p className="text-xs sm:text-sm text-slate-600">Metode Bayar: {METODE_BAYAR_LABELS[metodeBayar]}</p>
                 {['transfer', 'qris'].includes(metodeBayar) && (
-                  <p className="text-sm text-slate-600">Referensi: {noReferensi}</p>
+                  <p className="text-xs sm:text-sm text-slate-600">Referensi: {noReferensi}</p>
                 )}
-                <p className="text-sm text-slate-600">Periode: {tahunHijriah} H / {tahunMasehi} M</p>
+                <p className="text-xs sm:text-sm text-slate-600">Periode: {tahunHijriah} H / {tahunMasehi} M</p>
               </div>
               <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="text-left px-4 py-2 font-semibold text-slate-700">Jenis</th>
-                      <th className="text-right px-4 py-2 font-semibold text-slate-700">Nominal</th>
-                      <th className="text-right px-4 py-2 font-semibold text-slate-700">Beras</th>
-                      <th className="text-right px-4 py-2 font-semibold text-slate-700">Jiwa</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {items.map((item) => (
-                      <tr key={item.jenis_zakat} className="hover:bg-slate-50/50">
-                        <td className="px-4 py-2 font-medium text-slate-900">{JENIS_ZAKAT_LABELS[item.jenis_zakat]}</td>
-                        <td className="px-4 py-2 text-right text-slate-700">
-                          {['fitrah_uang', 'mal', 'fidyah', 'infaq'].includes(item.jenis_zakat)
-                            ? `Rp ${(item.nominal || 0).toLocaleString('id-ID')}`
-                            : '-'}
-                        </td>
-                        <td className="px-4 py-2 text-right text-slate-700">
-                          {item.jenis_zakat === 'fitrah_beras' ? `${(item.berat_kg || 0).toLocaleString('id-ID')} kg` : '-'}
-                        </td>
-                        <td className="px-4 py-2 text-right text-slate-700">
-                          {['fitrah_uang', 'fitrah_beras', 'fidyah'].includes(item.jenis_zakat)
-                            ? item.jumlah_jiwa || '-'
-                            : '-'}
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[350px] text-xs sm:text-sm">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="text-left px-3 sm:px-4 py-2 font-semibold text-slate-700">Jenis</th>
+                        <th className="text-right px-3 sm:px-4 py-2 font-semibold text-slate-700">Nominal</th>
+                        <th className="text-right px-3 sm:px-4 py-2 font-semibold text-slate-700">Beras</th>
+                        <th className="text-right px-3 sm:px-4 py-2 font-semibold text-slate-700">Jiwa</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {items.map((item) => (
+                        <tr key={item.jenis_zakat} className="hover:bg-slate-50/50">
+                          <td className="px-3 sm:px-4 py-2 font-medium text-slate-900">{JENIS_ZAKAT_LABELS[item.jenis_zakat]}</td>
+                          <td className="px-3 sm:px-4 py-2 text-right text-slate-700">
+                            {['fitrah_uang', 'mal', 'fidyah', 'infaq'].includes(item.jenis_zakat)
+                              ? `Rp ${(item.nominal || 0).toLocaleString('id-ID')}`
+                              : '-'}
+                          </td>
+                          <td className="px-3 sm:px-4 py-2 text-right text-slate-700">
+                            {item.jenis_zakat === 'fitrah_beras' ? `${(item.berat_kg || 0).toLocaleString('id-ID')} kg` : '-'}
+                          </td>
+                          <td className="px-3 sm:px-4 py-2 text-right text-slate-700">
+                            {['fitrah_uang', 'fitrah_beras', 'fidyah'].includes(item.jenis_zakat)
+                              ? item.jumlah_jiwa || '-'
+                              : '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-4 flex items-center justify-between">
+              <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm font-medium text-emerald-900">Total Transaksi</p>
-                  <p className="text-xs text-emerald-700">Termasuk semua item yang dipilih</p>
+                  <p className="text-xs sm:text-sm font-medium text-emerald-900">Total Transaksi</p>
+                  <p className="text-[10px] sm:text-xs text-emerald-700">Termasuk semua item yang dipilih</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-bold text-emerald-900">Rp {totalNominal.toLocaleString('id-ID')}</p>
-                  <p className="text-sm font-semibold text-emerald-700">{totalBeras.toLocaleString('id-ID')} kg</p>
+                  <p className="text-base sm:text-lg font-bold text-emerald-900">Rp {totalNominal.toLocaleString('id-ID')}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-emerald-700">{totalBeras.toLocaleString('id-ID')} kg</p>
                 </div>
               </div>
             </div>
           )}
         </CardContent>
-        <CardFooter className="bg-slate-50/50 border-t border-slate-100 flex items-center justify-between p-6">
+        <CardFooter className="bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-end gap-2 p-4 sm:p-6">
           {step < 4 ? (
-            <div className="ml-auto flex gap-2">
-              <Button variant="outline" onClick={handleBack} disabled={step === 1} className="border-slate-200">
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button variant="outline" onClick={handleBack} disabled={step === 1} className="border-slate-200 text-xs sm:text-sm flex-1 sm:flex-none">
                 Sebelumnya
               </Button>
               <Button
@@ -451,24 +458,24 @@ export default function FunnelFormPage() {
                   (step === 2 && !canProceedStep2) ||
                   (step === 3 && !canProceedStep3)
                 }
-                className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm gap-1.5 sm:gap-2 flex-1 sm:flex-none"
               >
                 Lanjutkan
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </div>
           ) : (
-            <div className="ml-auto flex gap-2">
-              <Button variant="outline" onClick={handleBack} className="border-slate-200">
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button variant="outline" onClick={handleBack} className="border-slate-200 text-xs sm:text-sm flex-1 sm:flex-none">
                 Sebelumnya
               </Button>
               <Button
                 onClick={handleSubmit}
                 disabled={createMutation.isPending}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm gap-1.5 sm:gap-2 flex-1 sm:flex-none"
               >
-                <Save className="h-4 w-4" />
-                {createMutation.isPending ? 'Menyimpan...' : 'Simpan Transaksi'}
+                <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                {createMutation.isPending ? 'Menyimpan...' : 'Simpan'}
               </Button>
             </div>
           )}
