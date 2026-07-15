@@ -54,7 +54,6 @@ export default function DemografiPage() {
   // Normalize data - handle both array and object response formats
   const wilayahData = useMemo(() => {
     if (!demografiData) return []
-    // Backend returns { wilayah: [...], asnaf_categories: [...] } or just [...]
     if (Array.isArray(demografiData)) return demografiData
     return demografiData.wilayah || []
   }, [demografiData])
@@ -131,14 +130,13 @@ export default function DemografiPage() {
   const mustahikCategoryChartData = useMemo(() => {
     if (!wilayahData || wilayahData.length === 0) return []
 
-    // Get the RTs to include based on selected filter
+    // When selectedRT is 'all', use all wilayahData, otherwise filter by selected RT
     const selectedRTs = selectedRT === 'all'
       ? wilayahData
       : wilayahData.filter((rt) => rt.rt_id === parseInt(selectedRT, 10) || rt.nama_rt === selectedRT)
 
     if (selectedRTs.length === 0) return []
 
-    // Aggregate mustahik per asnaf category across selected RTs
     const asnafTotals = {}
     selectedRTs.forEach((rt) => {
       if (rt.mustahik_per_asnaf) {
@@ -174,7 +172,7 @@ export default function DemografiPage() {
     }
     return (
       <ArrowUpDown
-        className={`h-4 w-4 ${sortDirection === 'asc' ? 'text-emerald-600' : 'text-emerald-600 transform rotate-180'}`}
+        className={`h-4 w-4 text-emerald-600 ${sortDirection === 'asc' ? '' : 'rotate-180'}`}
       />
     )
   }
@@ -215,60 +213,60 @@ export default function DemografiPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 text-slate-950 sm:p-6">
+    <div className="min-h-screen bg-slate-50 p-3 sm:p-4 lg:p-6 text-slate-950">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <header className="flex items-start justify-between mb-6">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4 sm:mb-6">
           <div>
             <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
               <MapPin className="h-4 w-4" />
               Pemetaan Demografi
             </div>
-            <h1 className="text-2xl font-semibold text-slate-900 mt-1">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-slate-900 mt-1">
               Demografi per Wilayah RT
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
               Lihat persebaran muzakki dan mustahik per wilayah RT
             </p>
           </div>
           <Button
             onClick={() => setShowAddRTModal(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 cursor-pointer"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 sm:gap-2 text-xs sm:text-sm w-full sm:w-auto"
           >
-            <Plus className="h-4 w-4" />
-            Tambah RT
+            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Tambah RT</span>
           </Button>
         </header>
 
         {/* Filter Card */}
-        <Card className="rounded-xl border border-slate-200/80 shadow-sm mb-6">
-          <CardContent className="p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div className="flex gap-3">
-                <div className="space-y-1">
-                  <Label htmlFor="tahunHijriah" className="text-xs font-medium text-slate-700">
+        <Card className="rounded-xl border border-slate-200/80 shadow-sm mb-4 sm:mb-6">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div className="flex flex-1 flex-col sm:flex-row gap-2 sm:gap-3">
+                <div className="space-y-1 flex-1 sm:flex-1">
+                  <Label htmlFor="tahunHijriah" className="text-[10px] sm:text-xs font-medium text-slate-700">
                     Tahun Hijriah
                   </Label>
                   <Input
                     id="tahunHijriah"
                     type="number"
-                    placeholder="Contoh: 1446"
+                    placeholder="1446"
                     value={tahunHijriah}
                     onChange={(e) => setTahunHijriah(e.target.value)}
-                    className="h-9 w-32 bg-white border-slate-200"
+                    className="h-9 sm:h-10 bg-white border-slate-200 text-xs sm:text-sm"
                   />
                 </div>
-                <div className="space-y-1">
-                  <Label htmlFor="tahunMasehi" className="text-xs font-medium text-slate-700">
+                <div className="space-y-1 flex-1 sm:flex-1">
+                  <Label htmlFor="tahunMasehi" className="text-[10px] sm:text-xs font-medium text-slate-700">
                     Tahun Masehi
                   </Label>
                   <Input
                     id="tahunMasehi"
                     type="number"
-                    placeholder="Contoh: 2025"
+                    placeholder="2025"
                     value={tahunMasehi}
                     onChange={(e) => setTahunMasehi(e.target.value)}
-                    className="h-9 w-32 bg-white border-slate-200"
+                    className="h-9 sm:h-10 bg-white border-slate-200 text-xs sm:text-sm"
                   />
                 </div>
               </div>
@@ -280,126 +278,129 @@ export default function DemografiPage() {
                     setTahunHijriah('')
                     setTahunMasehi('')
                   }}
-                  className="text-slate-500 hover:text-slate-700"
+                  className="text-[10px] sm:text-xs text-slate-500 hover:text-slate-700"
                 >
-                  Reset Filter
+                  Reset
                 </Button>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Summary Cards */}
-        {isLoading ? (
+        {/* Loading State */}
+        {isLoading && (
           <>
-            <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-4 mb-4">
               {[1, 2].map((i) => (
                 <Card key={`top-${i}`} className="rounded-xl border border-slate-200/80 shadow-sm">
-                  <CardContent className="p-6">
-                    <Skeleton className="h-4 w-24 mb-2" />
-                    <Skeleton className="h-8 w-16" />
+                  <CardContent className="p-3 sm:p-4 sm:p-6">
+                    <Skeleton className="h-3 sm:h-4 w-20 sm:w-24 mb-2" />
+                    <Skeleton className="h-6 sm:h-8 w-16 sm:w-20" />
                   </CardContent>
                 </Card>
               ))}
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
               {[1, 2, 3, 4].map((i) => (
                 <Card key={`bottom-${i}`} className="rounded-xl border border-slate-200/80 shadow-sm">
-                  <CardContent className="p-6">
-                    <Skeleton className="h-4 w-24 mb-2" />
-                    <Skeleton className="h-8 w-16" />
+                  <CardContent className="p-3 sm:p-4 sm:p-6">
+                    <Skeleton className="h-3 w-16 sm:w-20 mb-2" />
+                    <Skeleton className="h-5 sm:h-6 w-20 sm:w-28" />
                   </CardContent>
                 </Card>
               ))}
             </div>
           </>
-        ) : (
+        )}
+
+        {/* Data State */}
+        {!isLoading && (
           <>
             {/* Row 1: Muzakki & Mustahik */}
-            <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
               <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-3 sm:p-4 sm:p-6">
+                  <div className="flex items-center justify-between gap-2">
                     <div>
-                      <p className="text-sm font-medium text-slate-600">Total Muzakki Aktif</p>
-                      <p className="text-2xl font-bold text-slate-900 mt-1">
+                      <p className="text-[10px] sm:text-xs font-medium text-slate-600">Total Muzakki Aktif</p>
+                      <p className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 mt-0.5 sm:mt-1">
                         {totals.totalMuzakki.toLocaleString('id-ID')}
                       </p>
                     </div>
-                    <Users className="h-10 w-10 text-emerald-500" />
+                    <Users className="h-8 w-8 sm:h-10 sm:w-10 text-emerald-500 flex-shrink-0" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-3 sm:p-4 sm:p-6">
+                  <div className="flex items-center justify-between gap-2">
                     <div>
-                      <p className="text-sm font-medium text-slate-600">Total Mustahik Terverifikasi</p>
-                      <p className="text-2xl font-bold text-slate-900 mt-1">
+                      <p className="text-[10px] sm:text-xs font-medium text-slate-600">Total Mustahik</p>
+                      <p className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 mt-0.5 sm:mt-1">
                         {totals.totalMustahik.toLocaleString('id-ID')}
                       </p>
                     </div>
-                    <UserCheck className="h-10 w-10 text-blue-500" />
+                    <UserCheck className="h-8 w-8 sm:h-10 sm:w-10 text-blue-500 flex-shrink-0" />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Row 2: Dana & Beras */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
               <Card className="rounded-xl border border-emerald-200/80 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-slate-600">Total Dana Masuk</p>
-                      <p className="text-lg font-bold text-slate-900 mt-1">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-[10px] sm:text-xs font-medium text-slate-600 truncate">Dana Masuk</p>
+                      <p className="text-sm sm:text-base font-bold text-slate-900 mt-0.5 truncate">
                         {formatCurrency(totals.totalDanaMasuk)}
                       </p>
                     </div>
-                    <TrendingUp className="h-10 w-10 text-emerald-500" />
+                    <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-500 flex-shrink-0" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="rounded-xl border border-red-200/80 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-slate-600">Total Dana Keluar</p>
-                      <p className="text-lg font-bold text-slate-900 mt-1">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-[10px] sm:text-xs font-medium text-slate-600 truncate">Dana Keluar</p>
+                      <p className="text-sm sm:text-base font-bold text-slate-900 mt-0.5 truncate">
                         {formatCurrency(totals.totalDanaKeluar)}
                       </p>
                     </div>
-                    <TrendingDown className="h-10 w-10 text-emerald-500" />
+                    <TrendingDown className="h-6 w-6 sm:h-8 sm:w-8 text-red-500 flex-shrink-0" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="rounded-xl border border-emerald-200/80 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-slate-600">Beras Masuk</p>
-                      <p className="text-lg font-bold mt-1">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-[10px] sm:text-xs font-medium text-slate-600 truncate">Beras Masuk</p>
+                      <p className="text-sm sm:text-base font-bold mt-0.5 truncate">
                         {formatKg(totals.totalBerasMasuk)}
                       </p>
                     </div>
-                    <Package className="h-10 w-10 text-emerald-500" />
+                    <Package className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-500 flex-shrink-0" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="rounded-xl border border-red-200/80 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-slate-600">Beras Keluar</p>
-                      <p className="text-lg font-bold mt-1">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-[10px] sm:text-xs font-medium text-slate-600 truncate">Beras Keluar</p>
+                      <p className="text-sm sm:text-base font-bold mt-0.5 truncate">
                         {formatKg(totals.totalBerasKeluar)}
                       </p>
                     </div>
-                    <Package className="h-10 w-10 text-red-500" />
+                    <Package className="h-6 w-6 sm:h-8 sm:w-8 text-red-500 flex-shrink-0" />
                   </div>
                 </CardContent>
               </Card>
@@ -410,8 +411,8 @@ export default function DemografiPage() {
         {/* Error State */}
         {isError && (
           <Card className="rounded-xl border border-red-200 bg-red-50 shadow-sm mb-6">
-            <CardContent className="p-6 text-center">
-              <p className="text-sm font-medium text-red-700">
+            <CardContent className="p-4 sm:p-6 text-center">
+              <p className="text-xs sm:text-sm font-medium text-red-700">
                 Gagal memuat data demografi. Silakan coba lagi.
               </p>
               <Button
@@ -428,25 +429,22 @@ export default function DemografiPage() {
 
         {/* Charts Row */}
         {!isLoading && !isError && sortedData.length > 0 && (
-          <div className="grid grid-cols-1 gap-6 mb-6">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 mb-4 sm:mb-6">
             {/* Bar Chart - Muzakki per RT */}
             <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-              <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-                <CardTitle className="text-lg font-bold text-slate-900">
-                  Perbandingan Muzakki dan Mustahik per RT
+              <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-3 sm:p-4">
+                <CardTitle className="text-sm sm:text-base font-bold text-slate-900">
+                  Perbandingan Muzakki & Mustahik per RT
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4">
-                <div className="h-80">
+              <CardContent className="p-3 sm:p-4">
+                <div className="h-48 sm:h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={muzakkiChartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis dataKey="nama_rt" tick={{ fontSize: 12 }} stroke="#64748b" />
-                      <YAxis tick={{ fontSize: 12 }} stroke="#64748b" />
-                      <Tooltip
-                        contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                        formatter={(value, name) => [value, name]}
-                      />
+                      <XAxis dataKey="nama_rt" tick={{ fontSize: 10 }} stroke="#64748b" />
+                      <YAxis tick={{ fontSize: 10 }} stroke="#64748b" />
+                      <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }} />
                       <Legend />
                       <Bar dataKey="muzakki" name="Muzakki" fill="#10b981" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="mustahik" name="Mustahik" fill="#3b82f6" radius={[4, 4, 0, 0]} />
@@ -456,54 +454,44 @@ export default function DemografiPage() {
               </CardContent>
             </Card>
 
-            {/* Bar Chart - Mustahik Categories per RT */}
+            {/* Bar Chart - Mustahik per Asnaf */}
             <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-              <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <CardTitle className="text-lg font-bold text-slate-900">
-                    Kategori Mustahik per RT
+              <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+                  <CardTitle className="text-sm sm:text-base font-bold text-slate-900">
+                    Kategori Mustahik
                   </CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="rtSelect" className="text-sm text-slate-600">Pilih RT:</Label>
-                    <Select value={selectedRT} onValueChange={setSelectedRT}>
-                      <SelectTrigger id="rtSelect" className="w-40 h-9">
-                        <SelectValue placeholder="Semua RT" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-md">
-                        <SelectItem value="all">Semua RT</SelectItem>
-                        {rtList.map((rt) => (
-                          <SelectItem key={rt.rt_id} value={String(rt.rt_id)}>
-                            {rt.nama_rt}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Select value={selectedRT} onValueChange={setSelectedRT}>
+                    <SelectTrigger className="w-auto sm:w-40 h-8 sm:h-9 text-xs sm:text-sm">
+                      <SelectValue placeholder="Semua RT" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto bg-white border border-slate-200 shadow-lg rounded-md">
+                      <SelectItem value="all">Semua RT</SelectItem>
+                      {rtList.map((rt) => (
+                        <SelectItem key={rt.rt_id} value={String(rt.rt_id)}>
+                          {rt.nama_rt}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardHeader>
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 {mustahikCategoryChartData.length > 0 ? (
-                  <div className="h-80">
+                  <div className="h-48 sm:h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={mustahikCategoryChartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis
-                          dataKey="kategori"
-                          tick={{ fontSize: 11 }}
-                          stroke="#64748b"
-                        />
-                        <YAxis tick={{ fontSize: 12 }} stroke="#64748b" />
-                        <Tooltip
-                          contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                          formatter={(value) => [`${value} keluarga`, 'Jumlah']}
-                        />
+                        <XAxis dataKey="kategori" tick={{ fontSize: 10 }} stroke="#64748b" />
+                        <YAxis tick={{ fontSize: 10 }} stroke="#64748b" />
+                        <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }} />
                         <Bar dataKey="jumlah" name="Jumlah Keluarga" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className="h-40 flex items-center justify-center text-slate-500">
-                    <p className="text-sm">Tidak ada data mustahik terverifikasi</p>
+                  <div className="h-32 flex items-center justify-center text-slate-500">
+                    <p className="text-xs sm:text-sm">Tidak ada data mustahik terverifikasi.</p>
                   </div>
                 )}
               </CardContent>
@@ -512,187 +500,143 @@ export default function DemografiPage() {
         )}
 
         {/* Demografi Table */}
-        <Card className="rounded-xl border border-slate-200/80 shadow-sm">
-          <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-            <CardTitle className="text-lg font-bold text-slate-900">
-              Tabel Demografi per Wilayah RT
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 tracking-wider">
-                      <button
-                        className="flex items-center gap-1 hover:text-slate-900"
-                        onClick={() => handleSort('nama_rt')}
-                      >
-                        Wilayah RT
-                        <SortIcon field="nama_rt" />
-                      </button>
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase text-slate-600 tracking-wider">
-                      <button
-                        className="flex items-center gap-1 mx-auto hover:text-slate-900"
-                        onClick={() => handleSort('jumlah_muzakki_aktif')}
-                      >
-                        Muzakki Aktif
-                        <SortIcon field="jumlah_muzakki_aktif" />
-                      </button>
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase text-slate-600 tracking-wider">
-                      <button
-                        className="flex items-center gap-1 mx-auto hover:text-slate-900"
-                        onClick={() => handleSort('jumlah_mustahik_terverifikasi')}
-                      >
-                        Mustahik Terverifikasi
-                        <SortIcon field="jumlah_mustahik_terverifikasi" />
-                      </button>
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-600 tracking-wider">
-                      <button
-                        className="flex items-center gap-1 ml-auto hover:text-slate-900"
-                        onClick={() => handleSort('total_dana_masuk')}
-                      >
-                        Total Dana Masuk
-                        <SortIcon field="total_dana_masuk" />
-                      </button>
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-600 tracking-wider">
-                      <button
-                        className="flex items-center gap-1 ml-auto hover:text-slate-900"
-                        onClick={() => handleSort('total_dana_keluar')}
-                      >
-                        Total Dana Keluar
-                        <SortIcon field="total_dana_keluar" />
-                      </button>
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-600 tracking-wider">
-                      <button
-                        className="flex items-center gap-1 ml-auto hover:text-slate-900"
-                        onClick={() => handleSort('total_beras_masuk')}
-                      >
-                        Beras Masuk
-                        <SortIcon field="total_beras_masuk" />
-                      </button>
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-600 tracking-wider">
-                      <button
-                        className="flex items-center gap-1 ml-auto hover:text-slate-900"
-                        onClick={() => handleSort('total_beras_keluar')}
-                      >
-                        Beras Keluar
-                        <SortIcon field="total_beras_keluar" />
-                      </button>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {isLoading ? (
-                    Array.from({ length: 5 }).map((_, i) => (
-                      <tr key={i}>
-                        <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
-                        <td className="px-4 py-3 text-center"><Skeleton className="h-4 w-8 mx-auto" /></td>
-                        <td className="px-4 py-3 text-center"><Skeleton className="h-4 w-8 mx-auto" /></td>
-                        <td className="px-4 py-3 text-right"><Skeleton className="h-4 w-24 ml-auto" /></td>
-                        <td className="px-4 py-3 text-right"><Skeleton className="h-4 w-24 ml-auto" /></td>
-                        <td className="px-4 py-3 text-right"><Skeleton className="h-4 w-20 ml-auto" /></td>
-                        <td className="px-4 py-3 text-right"><Skeleton className="h-4 w-20 ml-auto" /></td>
-                      </tr>
-                    ))
-                  ) : sortedData.length === 0 ? (
+        {!isLoading && !isError && sortedData.length > 0 && (
+          <Card className="rounded-xl border border-slate-200/80 shadow-sm">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-3 sm:p-4">
+              <CardTitle className="text-sm sm:text-base font-bold text-slate-900">
+                Tabel Demografi per Wilayah RT
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[600px]">
+                  <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-500">
-                        Tidak ada data demografi. Pastikan sudah ada data muzakki dan mustahik.
-                      </td>
+                      <th className="px-3 sm:px-4 py-2.5 text-left text-[10px] sm:text-xs font-semibold uppercase text-slate-600 tracking-wider">
+                        <button className="flex items-center gap-1 hover:text-emerald-600" onClick={() => handleSort('nama_rt')}>
+                          Wilayah RT <SortIcon field="nama_rt" />
+                        </button>
+                      </th>
+                      <th className="px-3 sm:px-4 py-2.5 text-center text-[10px] sm:text-xs font-semibold uppercase text-slate-600 tracking-wider">
+                        <button className="flex items-center gap-1 mx-auto hover:text-emerald-600" onClick={() => handleSort('jumlah_muzakki_aktif')}>
+                          Muzakki <SortIcon field="jumlah_muzakki_aktif" />
+                        </button>
+                      </th>
+                      <th className="px-3 sm:px-4 py-2.5 text-center text-[10px] sm:text-xs font-semibold uppercase text-slate-600 tracking-wider">
+                        <button className="flex items-center gap-1 mx-auto hover:text-emerald-600" onClick={() => handleSort('jumlah_mustahik_terverifikasi')}>
+                          Mustahik <SortIcon field="jumlah_mustahik_terverifikasi" />
+                        </button>
+                      </th>
+                      <th className="px-3 sm:px-4 py-2.5 text-right text-[10px] sm:text-xs font-semibold uppercase text-slate-600 tracking-wider">
+                        <button className="flex items-center gap-1 ml-auto hover:text-emerald-600" onClick={() => handleSort('total_dana_masuk')}>
+                          Dana Masuk <SortIcon field="total_dana_masuk" />
+                        </button>
+                      </th>
+                      <th className="px-3 sm:px-4 py-2.5 text-right text-[10px] sm:text-xs font-semibold uppercase text-slate-600 tracking-wider">
+                        <button className="flex items-center gap-1 ml-auto hover:text-emerald-600" onClick={() => handleSort('total_dana_keluar')}>
+                          Dana Keluar <SortIcon field="total_dana_keluar" />
+                        </button>
+                      </th>
+                      <th className="px-3 sm:px-4 py-2.5 text-right text-[10px] sm:text-xs font-semibold uppercase text-slate-600 tracking-wider">
+                        <button className="flex items-center gap-1 ml-auto hover:text-emerald-600" onClick={() => handleSort('total_beras_masuk')}>
+                          Beras Masuk <SortIcon field="total_beras_masuk" />
+                        </button>
+                      </th>
+                      <th className="px-3 sm:px-4 py-2.5 text-right text-[10px] sm:text-xs font-semibold uppercase text-slate-600 tracking-wider">
+                        <button className="flex items-center gap-1 ml-auto hover:text-emerald-600" onClick={() => handleSort('total_beras_keluar')}>
+                          Beras Keluar <SortIcon field="total_beras_keluar" />
+                        </button>
+                      </th>
                     </tr>
-                  ) : (
-                    sortedData.map((rt) => (
-                      <tr key={rt.rt_id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-emerald-500" />
-                            <span className="font-medium text-slate-900">{rt.nama_rt}</span>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {sortedData.map((rt) => (
+                      <tr key={rt.rt_id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-3 sm:px-4 py-2.5">
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-500 flex-shrink-0" />
+                            <div>
+                              <span className="font-medium text-xs sm:text-sm text-slate-900">{rt.nama_rt}</span>
+                              {rt.keterangan && (
+                                <p className="text-[10px] sm:text-xs text-slate-500">{rt.keterangan}</p>
+                              )}
+                            </div>
                           </div>
-                          {rt.keterangan && (
-                            <p className="text-xs text-slate-500 mt-0.5">{rt.keterangan}</p>
-                          )}
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="inline-flex items-center justify-center min-w-[32px] px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 text-sm font-semibold">
+                        <td className="px-3 sm:px-4 py-2.5 text-center">
+                          <span className="inline-flex items-center justify-center min-w-[28px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs sm:text-sm font-semibold">
                             {rt.jumlah_muzakki_aktif}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="inline-flex items-center justify-center min-w-[32px] px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-semibold">
+                        <td className="px-3 sm:px-4 py-2.5 text-center">
+                          <span className="inline-flex items-center justify-center min-w-[28px] px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs sm:text-sm font-semibold">
                             {rt.jumlah_mustahik_terverifikasi}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-right font-medium text-emerald-700">
+                        <td className="px-3 sm:px-4 py-2.5 text-right font-medium text-emerald-700 text-xs sm:text-sm">
                           {formatCurrency(rt.total_dana_masuk)}
                         </td>
-                        <td className="px-4 py-3 text-right font-medium text-red-700">
+                        <td className="px-3 sm:px-4 py-2.5 text-right font-medium text-red-600 text-xs sm:text-sm">
                           {formatCurrency(rt.total_dana_keluar)}
                         </td>
-                        <td className="px-4 py-3 text-right font-medium text-emerald-700">
+                        <td className="px-3 sm:px-4 py-2.5 text-right font-medium text-emerald-700 text-xs sm:text-sm">
                           {formatKg(rt.total_beras_masuk)}
                         </td>
-                        <td className="px-4 py-3 text-right font-medium text-red-700">
+                        <td className="px-3 sm:px-4 py-2.5 text-right font-medium text-red-600 text-xs sm:text-sm">
                           {formatKg(rt.total_beras_keluar)}
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Add RT Dialog */}
         <Dialog open={showAddRTModal} onOpenChange={setShowAddRTModal}>
-          <DialogContent className="bg-white">
+          <DialogContent className="bg-white mx-full sm:mx-auto sm:max-w-md rounded-xl border border-slate-200 shadow-lg">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-emerald-600" />
+              <DialogTitle className="flex items-center gap-2 text-sm sm:text-base font-semibold text-slate-900">
+                <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
                 Tambah Wilayah RT Baru
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="namaRT">Nama RT *</Label>
+            <div className="space-y-3 py-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="namaRT" className="text-xs sm:text-sm font-medium text-slate-700">Nama RT *</Label>
                 <Input
                   id="namaRT"
                   value={newRTNama}
                   onChange={(e) => setNewRTNama(e.target.value)}
                   placeholder="Contoh: RT 01"
-                  className="bg-white border-slate-200"
+                  className="bg-white border-slate-200 text-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="keterangan">Keterangan</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="keterangan" className="text-xs sm:text-sm font-medium text-slate-700">Keterangan</Label>
                 <Input
                   id="keterangan"
                   value={newRTKeterangan}
                   onChange={(e) => setNewRTKeterangan(e.target.value)}
                   placeholder="Contoh: Jl. Masjid Al-Ikhlas"
-                  className="bg-white border-slate-200"
+                  className="bg-white border-slate-200 text-sm"
                 />
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
               <Button
                 variant="outline"
                 onClick={() => setShowAddRTModal(false)}
-                className="border-slate-200"
+                className="w-full sm:w-auto border-slate-200"
               >
                 Batal
               </Button>
               <Button
                 onClick={handleCreateRT}
                 disabled={isCreating}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
               >
                 {isCreating ? 'Menyimpan...' : 'Simpan'}
               </Button>
