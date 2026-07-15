@@ -10,13 +10,18 @@ import { AppError, ErrorCodes } from '../utils/errors.js'
 export async function getMustahikList(queryParams, dependencies = {}) {
   const connection = dependencies.db || db
   const parsed = mustahikListQuerySchema.parse(queryParams)
-  const { status_verifikasi, kategori_asnaf, wilayah_rt_id, page, limit } = parsed
+  const { search, status_verifikasi, kategori_asnaf, wilayah_rt_id, sortBy, sortOrder, page, limit } = parsed
 
   let baseQuery = connection('mustahik_asnaf').join(
     'wilayah_rt',
     'mustahik_asnaf.wilayah_rt_id',
     'wilayah_rt.id'
   )
+
+  // Search by nama_kepala_keluarga
+  if (search) {
+    baseQuery = baseQuery.where('mustahik_asnaf.nama_kepala_keluarga', 'ilike', `%${search}%`)
+  }
 
   if (status_verifikasi) {
     baseQuery = baseQuery.where('mustahik_asnaf.status_verifikasi', status_verifikasi)
@@ -34,9 +39,13 @@ export async function getMustahikList(queryParams, dependencies = {}) {
   const total = parseInt(totalQuery?.total || 0, 10)
   const offset = (page - 1) * limit
 
+  // Handle sorting
+  const orderColumn = sortBy || 'created_at'
+  const orderDirection = sortOrder || 'desc'
+
   const data = await baseQuery
     .select('mustahik_asnaf.*', 'wilayah_rt.nama_rt')
-    .orderBy('mustahik_asnaf.created_at', 'desc')
+    .orderBy(`mustahik_asnaf.${orderColumn}`, orderDirection)
     .limit(limit)
     .offset(offset)
 

@@ -2,14 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@shared/lib/api'
 import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
   Button,
-  Badge,
   Dialog,
   DialogTrigger,
   DialogContent,
@@ -107,131 +100,138 @@ export default function VerifikasiPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Verifikasi Mustahik</h1>
-          <p className="text-sm text-slate-500">Tinjau dan verifikasi pendaftaran mustahik baru.</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Verifikasi Mustahik</h1>
+          <p className="text-xs sm:text-sm text-slate-500">Tinjau dan verifikasi pendaftaran mustahik baru.</p>
         </div>
         <Link to="/mustahik">
-          <Button variant="outline" className="gap-2 border-slate-200 hover:bg-white">
-            <ArrowLeft className="h-4 w-4" />
-            Kembali ke Daftar
+          <Button variant="outline" className="gap-1.5 sm:gap-2 border-slate-200 hover:bg-white text-xs sm:text-sm w-full sm:w-auto">
+            <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span className="sm:inline">Kembali ke Daftar</span>
           </Button>
         </Link>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <Table>
-          <TableHeader className="bg-slate-50/75">
-            <TableRow>
-              <TableHead className="font-semibold text-slate-700">Nama Kepala Keluarga</TableHead>
-              <TableHead className="font-semibold text-slate-700">Kategori Asnaf</TableHead>
-              <TableHead className="font-semibold text-slate-700">Tanggungan</TableHead>
-              <TableHead className="font-semibold text-slate-700">Wilayah RT</TableHead>
-              <TableHead className="font-semibold text-slate-700">Registrasi</TableHead>
-              <TableHead className="w-[220px] font-semibold text-slate-700 text-right">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-slate-500 font-medium">
-                  Memuat data mustahik menunggu verifikasi...
-                </TableCell>
-              </TableRow>
-            ) : isError ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-red-500 font-medium">
-                  Gagal memuat data dari server.
-                </TableCell>
-              </TableRow>
-            ) : data?.data?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-slate-500">
-                  Tidak ada mustahik yang menunggu verifikasi.
-                </TableCell>
-              </TableRow>
-            ) : (
-              data?.data?.map((mustahik) => (
-                <TableRow key={mustahik.id} className="hover:bg-slate-50/50 transition-colors">
-                  <TableCell className="font-medium text-slate-900">{mustahik.nama_kepala_keluarga}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
-                      {KATEGORI_ASNAF_LABELS[mustahik.kategori_asnaf] || mustahik.kategori_asnaf}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-slate-600">{mustahik.jumlah_tanggungan} jiwa</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
-                      {mustahik.nama_rt || `RT ID: ${mustahik.wilayah_rt_id}`}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-slate-500">{formatDate(mustahik.created_at)}</TableCell>
-                  <TableCell className="flex justify-end gap-2 bg">
-                    <Dialog open={verifyDialogOpen && selectedMustahik?.id === mustahik.id} onOpenChange={setVerifyDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50"
-                          onClick={() => setSelectedMustahik(mustahik)}
-                        >
-                          <UserCheck className="h-4 w-4 mr-1" />
-                          Verifikasi
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-lg sm:w-full bg-white rounded-lg shadow-lg border border-slate-200">
-                        <DialogHeader>
-                          <DialogTitle>Konfirmasi Verifikasi</DialogTitle>
-                          <DialogDescription>
-                            Apakah Anda yakin ingin memverifikasi mustahik <strong>{mustahik.nama_kepala_keluarga}</strong>?
-                            Aksi ini tidak dapat dibatalkan.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                          <DialogClose asChild>
-                            <Button variant="outline" className="border-slate-200">Batal</Button>
-                          </DialogClose>
-                          <Button
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                            onClick={handleVerify}
-                            disabled={verifikasiMutation.isPending}
-                          >
-                            {verifikasiMutation.isPending ? 'Memproses...' : 'Ya, Verifikasi'}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm">
+        {/* Kontainer Horizontal Scroll - hanya untuk tabel */}
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead className="bg-slate-50/75">
+              <tr>
+                <th className="min-w-[150px] px-3 py-2.5 text-left text-xs font-semibold text-slate-700 whitespace-nowrap">Nama Kepala Keluarga</th>
+                <th className="min-w-[80px] px-3 py-2.5 text-left text-xs font-semibold text-slate-700 whitespace-nowrap">Kategori Asnaf</th>
+                <th className="min-w-[60px] px-3 py-2.5 text-left text-xs font-semibold text-slate-700 whitespace-nowrap">Tanggungan</th>
+                <th className="min-w-[80px] px-3 py-2.5 text-left text-xs font-semibold text-slate-700 whitespace-nowrap">Wilayah RT</th>
+                <th className="min-w-[80px] px-3 py-2.5 text-left text-xs font-semibold text-slate-700 whitespace-nowrap">Registrasi</th>
+                <th className="min-w-[100px] px-3 py-2.5 text-right text-xs font-semibold text-slate-700 whitespace-nowrap">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="h-24 text-center text-slate-500 font-medium text-xs px-3 py-3">
+                    Memuat data mustahik menunggu verifikasi...
+                  </td>
+                </tr>
+              ) : isError ? (
+                <tr>
+                  <td colSpan={6} className="h-24 text-center text-red-500 font-medium text-xs px-3 py-3">
+                    Gagal memuat data dari server.
+                  </td>
+                </tr>
+              ) : data?.data?.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="h-24 text-center text-slate-500 text-xs px-3 py-3">
+                    Tidak ada mustahik yang menunggu verifikasi.
+                  </td>
+                </tr>
+              ) : (
+                data?.data?.map((mustahik) => (
+                  <tr key={mustahik.id} className="hover:bg-slate-50/50 transition-colors border-t border-slate-100">
+                    <td className="px-3 py-2 font-medium text-slate-900 text-xs">
+                      <span className="block truncate max-w-[130px]">{mustahik.nama_kepala_keluarga}</span>
+                    </td>
+                    <td className="px-3 py-2">
+                      <span className="inline-block px-1.5 py-0.5 text-[10px] bg-slate-50 text-slate-700 border border-slate-200 rounded whitespace-nowrap">
+                        {KATEGORI_ASNAF_LABELS[mustahik.kategori_asnaf] || mustahik.kategori_asnaf}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-slate-600 text-xs whitespace-nowrap">{mustahik.jumlah_tanggungan} jiwa</td>
+                    <td className="px-3 py-2">
+                      <span className="inline-block px-1.5 py-0.5 text-[10px] bg-slate-50 text-slate-700 border border-slate-200 rounded whitespace-nowrap">
+                        {mustahik.nama_rt || `RT ${mustahik.wilayah_rt_id}`}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-slate-500 text-xs whitespace-nowrap">{formatDate(mustahik.created_at)}</td>
+                    <td className="px-3 py-2 text-right">
+                      <div className="flex justify-end gap-1">
+                        <Dialog open={verifyDialogOpen && selectedMustahik?.id === mustahik.id} onOpenChange={setVerifyDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 h-7 px-2 text-[10px]"
+                              onClick={() => setSelectedMustahik(mustahik)}
+                            >
+                              <UserCheck className="h-3.5 w-3.5 mr-1" />
+                              Verif
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-lg bg-white rounded-lg shadow-lg border border-slate-200">
+                            <DialogHeader>
+                              <DialogTitle>Konfirmasi Verifikasi</DialogTitle>
+                              <DialogDescription>
+                                Apakah Anda yakin ingin memverifikasi mustahik <strong>{mustahik.nama_kepala_keluarga}</strong>?
+                                Aksi ini tidak dapat dibatalkan.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                              <DialogClose asChild>
+                                <Button variant="outline" className="border-slate-200">Batal</Button>
+                              </DialogClose>
+                              <Button
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                                onClick={handleVerify}
+                                disabled={verifikasiMutation.isPending}
+                              >
+                                {verifikasiMutation.isPending ? 'Memproses...' : 'Ya, Verifikasi'}
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
 
-                    <Dialog open={rejectDialogOpen && selectedMustahik?.id === mustahik.id} onOpenChange={setRejectDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-700 hover:text-red-800 hover:bg-red-50"
-                          onClick={() => setSelectedMustahik(mustahik)}
-                        >
-                          <XCircle className="h-4 w-4 mr-1" />
-                          Tolak
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-lg sm:w-full bg-white rounded-lg shadow-lg border border-slate-200">
-                        <DialogHeader>
-                          <DialogTitle>Konfirmasi Penolakan</DialogTitle>
-                          <DialogDescription>
-                            Berikan alasan penolakan untuk <strong>{mustahik.nama_kepala_keluarga}</strong>.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <RejectForm onSubmit={handleReject} isLoading={verifikasiMutation.isPending} onCancel={() => setRejectDialogOpen(false)} />
-                      </DialogContent>
-                    </Dialog>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                        <Dialog open={rejectDialogOpen && selectedMustahik?.id === mustahik.id} onOpenChange={setRejectDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-700 hover:text-red-800 hover:bg-red-50 h-7 px-2 text-[10px]"
+                              onClick={() => setSelectedMustahik(mustahik)}
+                            >
+                              <XCircle className="h-3.5 w-3.5 mr-1" />
+                              Tolak
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-lg bg-white rounded-lg shadow-lg border border-slate-200">
+                            <DialogHeader>
+                              <DialogTitle>Konfirmasi Penolakan</DialogTitle>
+                              <DialogDescription>
+                                Berikan alasan penolakan untuk <strong>{mustahik.nama_kepala_keluarga}</strong>.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <RejectForm onSubmit={handleReject} isLoading={verifikasiMutation.isPending} onCancel={() => setRejectDialogOpen(false)} />
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
@@ -256,7 +256,7 @@ function RejectForm({ onSubmit, isLoading, onCancel }) {
         <Textarea
           id="alasan_penolakan"
           placeholder="Jelaskan alasan penolakan..."
-          className="min-h-[100px] bg-slate-50/25 focus-visible:ring-emerald-500 border-slate-200"
+          className="min-h-[80px] sm:min-h-[100px] bg-slate-50/25 focus-visible:ring-emerald-500 border-slate-200 text-sm"
           {...register('alasan_penolakan')}
         />
         {errors.alasan_penolakan && (

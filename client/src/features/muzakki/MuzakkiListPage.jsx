@@ -41,7 +41,7 @@ export default function MuzakkiListPage() {
 
   // Fetch Muzakki List
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['muzakki', { search, selectedRt, sortBy, sortOrder, page }],
+    queryKey: ['muzakki', search, selectedRt, sortBy, sortOrder, page],
     queryFn: async () => {
       const params = {
         page,
@@ -49,12 +49,13 @@ export default function MuzakkiListPage() {
         sortBy,
         sortOrder,
       }
-      if (search.trim() !== '') params.search = search
+      if (search.trim()) params.search = search.trim()
       if (selectedRt !== 'all') params.wilayah_rt_id = selectedRt
 
       const response = await api.get('/muzakki', { params })
       return response.data
     },
+    refetchOnWindowFocus: true,
   })
 
   // Mutation for toggle active status

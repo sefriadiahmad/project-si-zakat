@@ -43,9 +43,12 @@ export const mustahikVerifikasiSchema = z
   )
 
 export const mustahikListQuerySchema = z.object({
+  search: z.string().trim().optional(),
   status_verifikasi: z.enum(STATUS_VERIFIKASI).optional(),
   kategori_asnaf: z.enum(KATEGORI_ASNAF).optional(),
   wilayah_rt_id: z.coerce.number().int().positive().optional(),
+  sortBy: z.string().optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
   page: z.coerce.number().int().min(1).optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(10),
 })
