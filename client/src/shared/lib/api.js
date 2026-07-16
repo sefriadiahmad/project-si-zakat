@@ -2,7 +2,7 @@ import axios from 'axios'
 import { getStoredAuth, storeAuth, clearStoredAuth } from '@features/auth/authUtils'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10_000,
 })
 

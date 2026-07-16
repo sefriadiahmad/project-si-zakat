@@ -27,7 +27,7 @@ const PORT = process.env.PORT || 3001
 app.use(helmet())
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: process.env.CLIENT_URL,
   credentials: true,
 }))
 
@@ -60,8 +60,7 @@ app.use(errorHandler)
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
-    console.log(`API Base: http://localhost:${PORT}/api`)
+    console.log(`Environment: ${process.env.NODE_ENV}`)
   })
 }
 
