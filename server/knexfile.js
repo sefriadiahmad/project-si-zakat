@@ -5,7 +5,7 @@ dotenv.config()
 export default {
   development: {
     client: 'pg',
-    connection: {
+    connection: process.env.DATABASE_URL ||{
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT) || 5432,
       database: process.env.DB_NAME || 'sistem_zakat',
@@ -27,7 +27,7 @@ export default {
 
   production: {
     client: 'pg',
-    connection: {
+    connection: process.env.DATABASE_URL ||{
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT),
       database: process.env.DB_NAME,
