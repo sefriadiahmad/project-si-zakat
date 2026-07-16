@@ -42,8 +42,9 @@ function ToastProvider({ children }) {
     <ToastContext.Provider value={value}>
       {children}
       {/* Toast Viewport rendered inside the provider */}
+      {/* Mobile: top-right | Desktop: bottom-right */}
       <div
-        className="fixed bottom-4 right-4 z-[100] flex max-h-screen w-full max-w-[420px] flex-col-reverse gap-2 pointer-events-none"
+        className="fixed top-4 right-4 z-[100] flex max-h-screen w-[calc(100%-2rem)] max-w-[380px] flex-col gap-2 pointer-events-none sm:bottom-4 sm:right-4 sm:top-auto sm:w-full sm:max-w-[420px]"
         aria-live="polite"
         aria-label="Notifikasi"
       >
@@ -69,16 +70,16 @@ function ToastItem({ id, title, description, variant = 'default', onDismiss }) {
     <div
       role="alert"
       className={cn(
-        'pointer-events-auto flex w-full items-start gap-3 rounded-xl p-4 transition-all animate-in slide-in-from-bottom-2',
+        'pointer-events-auto flex w-full items-start gap-2 rounded-xl p-3 sm:p-4 transition-all animate-in slide-in-from-top-2 sm:slide-in-from-bottom-2',
         variantClasses[variant] || variantClasses.default
       )}
     >
       <div className="flex-1 min-w-0">
         {title && (
-          <div className="text-sm font-semibold leading-snug">{title}</div>
+          <div className="text-xs sm:text-sm font-semibold leading-snug">{title}</div>
         )}
         {description && (
-          <div className="mt-0.5 text-xs opacity-80 leading-snug">{description}</div>
+          <div className="mt-0.5 text-[10px] sm:text-xs opacity-80 leading-snug">{description}</div>
         )}
       </div>
       <button
@@ -86,7 +87,7 @@ function ToastItem({ id, title, description, variant = 'default', onDismiss }) {
         className="flex-shrink-0 rounded-md p-0.5 opacity-60 hover:opacity-100 transition-opacity focus:outline-none"
         aria-label="Tutup notifikasi"
       >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" className="sm:w-3.5 sm:h-3.5">
           <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
         </svg>
       </button>
